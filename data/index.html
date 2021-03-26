@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Test WebSocket Interface</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="jquery-3.5.1.js"></script>
+	<script src='FileSaver.js'></script>
+	<!--All jQuery scripts go below this line-->
+	<script src='ws.js'></script>
+</head>
+<body>
+	<h1>ESP32 ATLAST</h1>
+	<!--ATLAST FORTH shell-->
+	<div id="cliOut"></div>
+	<input id="cliIn" type="text">
+	<!--File upload button-->
+	<input id="fileUpDialog" type="file">
+	<button id="fileUpButton">Upload file...</button>
+	<!--File list-->
+	<select name="fileSelect" id="fileSelect">
+		<option disabled selected>No file list received.</option>
+	</select>
+	<!--File download button-->
+	<button id="fileDnButton">Download file</button>
+	<!--File delete button-->
+	<button id="fileDelButton">Delete file</button>
+</body>
+</html>
