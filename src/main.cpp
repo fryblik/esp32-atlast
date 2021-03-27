@@ -29,12 +29,6 @@ bool readSerial() {
         // Read byte from buffer:
         char inChar = (char)Serial.read();
 
-        // We don't do that here. But OK.
-        if(inChar == '\r') {
-            Serial.printf("\r"); 
-            inChar = '\n';
-        }
-
         // Add byte to inputString:
         inputString[filled] = inChar;
         
@@ -58,6 +52,8 @@ void setup() {
         Serial.println("An Error has occurred while mounting SPIFFS");
         abort();
     }
+
+    // TODO: get wlan configuration from file
 
     // Connect to access point
     connectWLAN(ssid, password);

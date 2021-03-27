@@ -28,7 +28,7 @@ std::vector<std::string> corePaths {
  * 
  * Handle websocket events.
  */
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len) {
     // Figure out the type of WebSocket event
     switch(type) {
         // New client has connected
@@ -307,7 +307,6 @@ void incomingJSON(const char* inputData, size_t len) {
 
         // Send approval of download
         wsSendAck("upload", "ready", &nextPath[1]);
-
         multiPrintf("DEBUG: Ready to receive file: %s\n", nextPath);
 
     } else if (doc["type"] == "delete") {

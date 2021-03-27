@@ -1,11 +1,7 @@
 // jQuery document
 
-// TODO: get device's IP
-const TARGET_IP = '192.168.0.122';
-const TARGET_PORT = '80';
-
 // Initiate WebSocket connection
-let ws = new WebSocket('ws://' + TARGET_IP + ':' + TARGET_PORT + '/ws', ['arduino']);
+let ws = new WebSocket('ws://' + location.host + '/ws', ['arduino']);
 
 // File pending for upload
 let pendingFile;
