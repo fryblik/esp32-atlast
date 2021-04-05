@@ -238,7 +238,6 @@ bool removeFile(const char * path) {
  */
 void incomingData(uint8_t* inputData, size_t len) {
 	// Incoming file is stored under 'nextPath'
-	// TODO: append to existing file?
 
     // Remove potential existing file, return if it's protected from modifying
     if(!removeFile(nextPath)) {

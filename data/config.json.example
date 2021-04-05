@@ -1,0 +1,14 @@
+{
+    "networks": [
+        {
+            "ssid": "network1",
+            "password": "password1"
+        }
+    ],
+    [
+        {
+            "ssid": "network2",
+            "password": "password2"
+        }
+    ]
+}

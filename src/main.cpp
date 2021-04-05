@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
@@ -9,14 +10,17 @@
 #include "multi-io.h"
 #include "webserver.h"
 
-// WLAN constants
-const char* ssid = "Stable connection";
-const char* password = "It'sGonnaWorkISwearIt'sGonnaWork";
+// WLAN configuration
+struct WlanConf {
+    char ssid[33];
+    char password[64];
+} wlanConf;
 
 // A buffer to hold incoming data
 char inputString[256];
 // Length of incomplete line stored in inputString
 size_t filled = 0;
+
 
 /**
  * Read serial
@@ -44,6 +48,34 @@ bool readSerial() {
     return false;
 }
 
+/**
+ * Load config
+ * 
+ * Deserialize and load configuration from config.json.
+ * Loads the first network configuration in the "networks" array.
+ * Return true on success, false otherwise.
+ */
+bool loadConfig() {
+    // Open configuration file
+    File confFile = SPIFFS.open("/config.json");
+
+    // Allocate JSON document and deserialize
+    DynamicJsonDocument doc(2048);
+    DeserializationError error = deserializeJson(doc, confFile);
+    if (error) {
+        Serial.printf("Failed to deserialize config.json: %s\n", error);
+        return false;
+    }
+
+    // Load the first WLAN in the "networks" array
+    strcpy(wlanConf.ssid, doc["networks"][0]["ssid"]);
+    strcpy(wlanConf.password, doc["networks"][0]["password"]);
+
+    // TODO: Load multiple WLAN configurations
+
+    return true;
+}
+
 void setup() {
     Serial.begin(115200);
 
@@ -53,10 +85,12 @@ void setup() {
         abort();
     }
 
-    // TODO: get wlan configuration from file
+    // Load config.json
+    // TODO: handle false return
+    loadConfig();
 
     // Connect to access point
-    connectWLAN(ssid, password);
+    connectWLAN(wlanConf.ssid, wlanConf.password);
 
     // Start web server
     setupWebServer();
@@ -72,6 +106,9 @@ void setup() {
 
     // TODO DEBUG: List SPIFFS files in CLI
     printFileList();
+
+    // TODO: Program task
+    //xTaskCreate(&func, "task_name", 2048, NULL, 5, NULL);
 }
 
 void loop() {
