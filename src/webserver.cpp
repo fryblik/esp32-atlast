@@ -60,42 +60,53 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
         {
             // Update current client (TODO: write to multiple clients at once?)
             currentClient = client;
-            
-            // Parse arguments
-            AwsFrameInfo * info = (AwsFrameInfo*)arg;
-            if(info->final && info->index == 0 && info->len == len) {
-                // The whole message is in a single frame
 
-                if (info->opcode == WS_TEXT) {
-                    // Single-frame text (JSON)
-
-                    // Verify input length (TODO: necessary?)
-                    if (info->len > 250){
-                        multiPrintf("DISCARDED INPUT: TOO LONG (%u > 250)\n", (size_t) info->len);
-                        break;
-                    }
-                    // Handle received JSON
-                    incomingJSON((char*) data, (size_t) info->len);
-
-                } else if (info->opcode == WS_BINARY) {
-                    // Single-frame binary data
-
-                    // Handle received data
-                    incomingData(data, (size_t) info->len);
-                }
-            } else {
-                // Message is comprised of multiple frames or the frame is split into multiple packets
-                // https://github.com/me-no-dev/ESPAsyncWebServer#async-websocket-event
-                // TODO
-            }
+            // Parse received data
+            parseReceived(arg, data, len);
             break;
-        } // End of scope for WS_EVT_DATA
+        }
             
         // For other events, do nothing
         case WS_EVT_ERROR:
         case WS_EVT_PONG:
         default:
             break;
+    }
+}
+
+/**
+ * Parse received
+ * 
+ * Parse data received through websocket.
+ */
+void parseReceived(void * arg, uint8_t *data, size_t len) {
+    // Parse arguments
+    AwsFrameInfo * info = (AwsFrameInfo*)arg;
+
+    if(info->final && info->index == 0 && info->len == len) {
+        // The whole message is in a single frame
+
+        if (info->opcode == WS_TEXT) {
+            // Single-frame text (JSON)
+
+            // Verify input length (TODO: necessary?)
+            if (info->len > 250){
+                multiPrintf("DISCARDED INPUT: TOO LONG (%u > 250)\n", (size_t) info->len);
+                return;
+            }
+            // Handle received JSON
+            incomingJSON((char*) data, (size_t) info->len);
+
+        } else if (info->opcode == WS_BINARY) {
+            // Single-frame binary data
+
+            // Handle received data
+            incomingData(data, (size_t) info->len);
+        }
+    } else {
+        // Message is comprised of multiple frames or the frame is split into multiple packets
+        // https://github.com/me-no-dev/ESPAsyncWebServer#async-websocket-event
+        // TODO
     }
 }
 

@@ -1,4 +1,11 @@
 /**
+ * Parse received
+ * 
+ * Parse data received through websocket.
+ */
+void parseReceived(void * arg, uint8_t *data, size_t len);
+
+/**
  * Connect to WLAN
  */
 void connectWLAN(const char* ssid, const char* password);
