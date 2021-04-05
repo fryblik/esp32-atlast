@@ -5,7 +5,7 @@
 #include <WiFi.h>
 #include <WebSocketsServer.h>
 
-#include "atlast.h"
+#include "atlast-1.2/atlast.h"
 #include "atlast-words.h"
 #include "multi-io.h"
 #include "webserver.h"
@@ -63,7 +63,7 @@ bool loadConfig() {
     DynamicJsonDocument doc(2048);
     DeserializationError error = deserializeJson(doc, confFile);
     if (error) {
-        Serial.printf("Failed to deserialize config.json: %s\n", error);
+        Serial.printf("Failed to deserialize config.json: %s\n", error.c_str());
         return false;
     }
 
