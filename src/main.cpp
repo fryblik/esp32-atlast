@@ -6,6 +6,7 @@
 #include <WebSocketsServer.h>
 
 #include "atlast-1.2/atlast.h"
+#include "atlast-tasks.h"
 #include "atlast-words.h"
 #include "multi-io.h"
 #include "webserver.h"
@@ -102,13 +103,18 @@ void setup() {
     atl_init();
 
     // Preload FORTH words
-    preloadWords();
+    //preloadWords();
 
-    // TODO DEBUG: List SPIFFS files in CLI
+    // DEBUG: List SPIFFS files in CLI
     printFileList();
 
-    // TODO: Program task
-    //xTaskCreate(&func, "task_name", 2048, NULL, 5, NULL);
+
+    // TODO: Test ATLAST from file task
+    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
+    rd.filename = "/test.4th";
+    xTaskCreate(&atlastFromFile, "atl_from_file", 65536, NULL, 5, NULL);
+    rd.startFlag = true;
+    xSemaphoreGive(atlastRunMutex);
 }
 
 void loop() {

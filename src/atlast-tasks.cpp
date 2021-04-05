@@ -1,47 +1,15 @@
-#include <Arduino.h>
-
+#include "atlast-1.2/atlast.h"
 #include "atlast-tasks.h"
 #include "multi-io.h"
 
-/**
- * ATLAST program
- * 
- * Execute ATLAST code from file in own task.
- */
-void atlastFromFile(void * pvParameter) {
-    // TODO: Initialize ATLAST
 
-    // Wait for execution
-    while(true) {
-        // If not ready to start, try again
-        if (!startAtlastFromFile())
-            continue;
+// Run data
+struct runData rd;
 
-        // Execute code in file line by line
-        rd.codeFile = SPIFFS.open(rd.filename);
-        while (rd.codeFile.available()) {
-            // Kill task?
-            if (rd.killFlag)
-                break;
-                // TODO: Kill inside atlast.c
+// Run data mutex
+// TODO: rework to use faster task notifications instead?
+SemaphoreHandle_t atlastRunMutex = xSemaphoreCreateMutex();
 
-            // Read line of code and evaluate
-            if (rd.codeFile.readBytesUntil('\n', rd.codeBuff, CODE_BUFF_SIZE) < CODE_BUFF_SIZE) {
-                // TODO: Print line
-                // TODO: Evaluate ATLAST
-            } else {
-                // Buffer overflow - exit program
-                multiPrintf("ATLAST RUNTIME ERROR: Too long code line in %s. Exiting.\n", rd.filename);
-                break;
-            }
-        }
-
-        // Close file, reset run data and give back mutex
-        resetAtlastFromFile();
-  
-        // TODO: Break spaghetti     
-    }
-}
 
 /**
  * Start ATLAST from file
@@ -77,4 +45,55 @@ void resetAtlastFromFile() {
     rd.isRunning = false;
     rd.killFlag = false;
     xSemaphoreGive(atlastRunMutex);
+}
+
+/**
+ * ATLAST program
+ * 
+ * Execute ATLAST code from file in own task.
+ */
+void atlastFromFile(void * pvParameter) {
+    // Initialize ATLAST interpreter
+    // TODO: This is meaningless, it's shared for all tasks. F#@K.
+    atl_init();
+
+    // Wait for execution
+    while(true) {
+        // If not ready to start, try again
+        if (!startAtlastFromFile())
+            continue;
+
+        // Execute code in file line by line
+        rd.codeFile = SPIFFS.open(rd.filename);
+        while (rd.codeFile.available()) {
+            // On KILL flag abort execution
+            if (rd.killFlag){
+                atl_eval("ABORT");
+                // TODO: Implement kill also inside running ATLAST loop
+                break;
+            }
+
+            // Read line of code and evaluate
+            size_t len = rd.codeFile.readBytesUntil('\n', rd.codeBuff, CODE_BUFF_SIZE);
+            if (len < CODE_BUFF_SIZE) {
+                // Terminate buffer
+                rd.codeBuff[len] = '\0';
+
+                // DEBUG: Print code line
+                multiPrintf("<> %s\n", rd.codeBuff);
+
+                // Evaluate and print response
+                atl_eval(rd.codeBuff);
+                multiPrintf("\n  ok\n");
+            } else {
+                // Buffer overflow - exit program
+                multiPrintf("ATLAST RUNTIME ERROR: Too long code line in %s. Exiting.\n", rd.filename);
+                break;
+            }
+        }
+        // TODO: Wait for input before exiting without kill?
+
+        // Close file, reset run data and give back mutex
+        resetAtlastFromFile(); 
+    }
 }
