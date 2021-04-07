@@ -6,6 +6,7 @@
 #include <SPIFFS.h>
 
 #include "atlast-1.2/atlast.h"
+#include "atlast-task.h"
 #include "multi-io.h"
 #include "webserver.h"
 
@@ -44,12 +45,8 @@ void incomingText(const char* inputData, size_t len) {
 	strncpy(terminated_string, inputData, len);
 	terminated_string[len] = '\0';
 
-	// Print incoming command
-	multiPrintf("> %s\n", terminated_string);
-
-	// Evaluate and print response
-	atl_eval(terminated_string);
-	multiPrintf("\n  ok\n");
+	// Pass command to ATLAST interpreter
+	atlastCommand(terminated_string);
 }
 
 /**

@@ -25,3 +25,10 @@ extern SemaphoreHandle_t atlastRunMutex;
  * Execute ATLAST code from file in own task.
  */
 void atlastFromFile(void * pvParameter);
+
+/**
+ * Evaluate ATLAST
+ * 
+ * Evaluate ATLAST command.
+ */
+void atlastCommand(char* command);

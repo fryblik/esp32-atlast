@@ -1,5 +1,5 @@
 #include "atlast-1.2/atlast.h"
-#include "atlast-tasks.h"
+#include "atlast-task.h"
 #include "multi-io.h"
 
 
@@ -53,9 +53,7 @@ void resetAtlastFromFile() {
  * Execute ATLAST code from file in own task.
  */
 void atlastFromFile(void * pvParameter) {
-    // Initialize ATLAST interpreter
-    // TODO: This is meaningless, it's shared for all tasks. F#@K.
-    atl_init();
+    // TODO: atl_mark, atl_unwind
 
     // Wait for execution
     while(true) {
@@ -69,7 +67,7 @@ void atlastFromFile(void * pvParameter) {
             // On KILL flag abort execution
             if (rd.killFlag){
                 atl_eval("ABORT");
-                // TODO: Implement kill also inside running ATLAST loop
+                // TODO: Implement kill also inside running ATLAST loop (atl_break)
                 break;
             }
 
@@ -79,7 +77,7 @@ void atlastFromFile(void * pvParameter) {
                 // Terminate buffer
                 rd.codeBuff[len] = '\0';
 
-                // DEBUG: Print code line
+                // DEBUG: Print code line (use "1 TRACE"?)
                 multiPrintf("<> %s\n", rd.codeBuff);
 
                 // Evaluate and print response
@@ -97,3 +95,26 @@ void atlastFromFile(void * pvParameter) {
         resetAtlastFromFile(); 
     }
 }
+
+/**
+ * Evaluate ATLAST
+ * 
+ * Evaluate ATLAST command.
+ */
+void atlastCommand(char* command) {
+    // TODO: kill (BREAK)
+    // TODO: mutex
+    // TODO: ATLAST from console, if program not running
+    // TODO: (in which source file?) file management with mutex
+
+
+    // TODO: replace using Run Data? old way:
+	// Print incoming command
+	multiPrintf("> %s\n", command);
+
+	// Evaluate and print response
+	atl_eval(command);
+	multiPrintf("\n  ok\n");
+}
+
+// TODO: Move all ATLAST init from main.cpp here 
