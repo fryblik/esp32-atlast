@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+// EDIT:
+#include "Arduino.h"
+#include "esp_spiffs.h"
 
 #ifdef ALIGNMENT
 #ifdef __TURBOC__

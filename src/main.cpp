@@ -7,7 +7,6 @@
 
 #include "atlast-1.2-esp32/atlast.h"
 #include "atlast-task.h"
-#include "atlast-words.h"
 #include "multi-io.h"
 #include "webserver.h"
 
@@ -99,22 +98,10 @@ void setup() {
     // Start mDNS responder (esp.local)
     MDNS.begin("ESP");
 
-    // Initialize FORTH interpreter
-    atl_init();
+    // TODO: Make possible use without WLAN
 
-    // Preload FORTH words
-    //preloadWords();
-
-    // DEBUG: List SPIFFS files in CLI
-    printFileList();
-
-
-    // TODO: Test ATLAST from file task
-    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.filename = "/test.4th";
-    xTaskCreate(&atlastFromFile, "atl_from_file", 65536, NULL, 5, NULL);
-    rd.startFlag = true;
-    xSemaphoreGive(atlastRunMutex);
+    // Initialize ATLAST interpreter and create interpreter task
+    initAtlast();
 }
 
 void loop() {

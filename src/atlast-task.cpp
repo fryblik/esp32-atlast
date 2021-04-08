@@ -117,5 +117,24 @@ void atlastCommand(char* command) {
 	multiPrintf("\n  ok\n");
 }
 
-// TODO: Move all ATLAST init from main.cpp here
-// TODO: Throttle evaluation, if websocket queue is getting full (try WORDSUSED)
+/**
+ * Init Atlast
+ * 
+ * Initiate Atlast and create interpreter task.
+ */
+void initAtlast() {
+    // Initialize ATLAST interpreter
+    //atl_init(); // Redundant with PROLOGUE package active
+
+    // DEBUG: List SPIFFS files in CLI
+    printFileList();
+
+    // TODO: Test ATLAST from file task
+    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
+    rd.filename = "/run-on-startup.atl";
+    xTaskCreate(&atlastFromFile, "atl_from_file", 65536, NULL, 5, NULL);
+    rd.startFlag = true;
+    xSemaphoreGive(atlastRunMutex);
+}
+
+// TODO: Throttle evaluation, if websocket queue is getting full (try WORDSUSED to see behavior)

@@ -32,3 +32,10 @@ void atlastFromFile(void * pvParameter);
  * Evaluate ATLAST command.
  */
 void atlastCommand(char* command);
+
+/**
+ * Init Atlast
+ * 
+ * Initiate Atlast and create interpreter task.
+ */
+void initAtlast();
