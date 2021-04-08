@@ -5,7 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 
-#include "atlast-1.2/atlast.h"
+#include "atlast-1.2-esp32/atlast.h"
 #include "atlast-task.h"
 #include "multi-io.h"
 #include "webserver.h"

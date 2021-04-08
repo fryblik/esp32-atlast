@@ -289,7 +289,8 @@ void incomingJSON(const char* inputData, size_t len) {
     if (doc["type"] == "cli") {
         // CLI input
         // TODO: length unneeded?
-        incomingText(doc["data"], sizeof(doc["data"]));
+        String data = doc["data"];
+        incomingText(data.c_str(), data.length());
 
     } else if (doc["type"] == "fileList") {
         // File list requested

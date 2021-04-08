@@ -53,7 +53,7 @@
 #define DOUBLE			      /* Double word primitives (2DUP) */
 #define EVALUATE		      /* The EVALUATE primitive */
 // EDIT:
-//#define FILEIO			      /* File I/O primitives */
+#define FILEIO			      /* File I/O primitives */
 #define MATH			      /* Math functions */
 #define MEMMESSAGE		      /* Print message for stack/heap errors */
 #define PROLOGUE		      /* Prologue processing and auto-init */
@@ -66,8 +66,9 @@
 #ifndef NOMEMCHECK
 #define TRACE			      /* Execution tracing */
 #define WALKBACK		      /* Walkback trace */
-// EDIT: WORDSUSED - writing to *(dw->wname) in lookup() causes LoadStoreError
-//#define WORDSUSED		      /* Logging of words used and unused */
+#define WORDSUSED		      /* Logging of words used and unused */
+// EDIT: prevent LoadStoreError when overwriting *(dw->wname) in lookup(): 
+#define READONLYSTRINGS
 #endif /* NOMEMCHECK */
 #endif /* !INDIVIDUALLY */
 

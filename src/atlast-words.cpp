@@ -1,4 +1,4 @@
-#include "atlast-1.2/atlast.h"
+#include "atlast-1.2-esp32/atlast.h"
 #include "atlast-words.h"
 
 /**
