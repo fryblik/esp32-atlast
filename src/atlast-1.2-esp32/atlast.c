@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-// EDIT:
+
+// ESP:
 #include "Arduino.h"
-#include "esp_spiffs.h"
 
 #ifdef ALIGNMENT
 #ifdef __TURBOC__
@@ -55,7 +55,6 @@
 #define DEFFIELDS		      /* Definition field access for words */
 #define DOUBLE			      /* Double word primitives (2DUP) */
 #define EVALUATE		      /* The EVALUATE primitive */
-// EDIT:
 #define FILEIO			      /* File I/O primitives */
 #define MATH			      /* Math functions */
 #define MEMMESSAGE		      /* Print message for stack/heap errors */
@@ -64,21 +63,25 @@
 #define SHORTCUTA		      /* Shortcut integer arithmetic words */
 #define SHORTCUTC		      /* Shortcut integer comparison */
 #define STRING			      /* String functions */
-// EDIT:
+
+// ESP:
 //#define SYSTEM			      /* System command function */
+
 #ifndef NOMEMCHECK
 #define TRACE			      /* Execution tracing */
 #define WALKBACK		      /* Walkback trace */
 #define WORDSUSED		      /* Logging of words used and unused */
-// EDIT: prevent LoadStoreError when overwriting *(dw->wname) in lookup(): 
+
+// ESP: prevent LoadStoreError when overwriting *(dw->wname) in lookup(): 
 #define READONLYSTRINGS
+
 #endif /* NOMEMCHECK */
 #endif /* !INDIVIDUALLY */
 
 
 #include "atldef.h"
 
-// EDIT: "Override" printf() with custom formatted print 
+// ESP: "Override" printf() with custom formatted print 
 #ifdef ESP32_PRIM
 #include "multi-io.h"
 #define	printf multiPrintf
@@ -1513,7 +1516,7 @@ prim P_type()			      /* Print string pointed to by stack */
 {
     Sl(1);
     Hpc(S0);
-    V printf("%s", (char *) S0);
+    V printf("%s", (char *) S0); // ESP: Unterminated may break websocket!
     Pop;
 }
 
@@ -1562,7 +1565,12 @@ prim P_fopen()			      /* Open file: fname fmodes fd -- flag */
     Hpc(S2);
     Hpc(S0);
     Isfile(S0);
-    fd = fopen((char *) S2, fopenmodes[S1]);
+
+    // ESP: Prepend file path with SPIFFS path prefix
+    char spiffsPath[40];
+    strncpy(stpcpy(spiffsPath, "/spiffs"), (char *) S2, 32);
+
+    fd = fopen(spiffsPath, fopenmodes[S1]);
     if (fd == NULL) {
 	stat = Falsity;
     } else {
@@ -2716,7 +2724,7 @@ prim P_fwdresolve()		      /* Emit forward jump offset */
 
 #endif /* COMPILERW */
 
-// EDIT: ESP32 primitive words (blippy)
+// ESP: ESP32 words (blippy)
 #ifdef ESP32_PRIM
 
 prim P_hi() {   // simple greeting  
@@ -3004,7 +3012,7 @@ static struct primfcn primt[] = {
     {"0EVALUATE", P_evaluate},
 #endif /* EVALUATE */
 
-// EDIT: blippy
+// ESP: blippy
 #ifdef ESP32_PRIM
     {"0HI", P_hi},
     {"0PINM", P_pinm},

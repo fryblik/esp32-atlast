@@ -55,7 +55,7 @@ extern atl_int atl_errline;	      /* Line number where last atl_load()
 #define ATL_APPLICATION -14	      /* Application primitive atl_error() */
 
 /*  Entry points  */
-//  EDIT: C/C++ linker compatibility, EXPORT and ESP32 definition
+//  ESP: C/C++ linker compatibility, EXPORT and ESP32 definition
 #ifdef __cplusplus
 extern "C" {
 #endif

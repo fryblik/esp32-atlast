@@ -278,7 +278,7 @@ pragma On(PCC_msgs);		      /* High C compiler is brain-dead */
 #define SREAL0(x) rbuf2=(x); (void)memcpy((char *) &S1, (char *) &rbuf2, sizeof(atl_real))
 #define SREAL1(x) rbuf2=(x); (void)memcpy((char *) &S3, (char *) &rbuf2, sizeof(atl_real))
 #else
-// EDIT: alignment shifted as in https://github.com/blippy/rpi/tree/master/atlast
+// ESP: alignment shifted as in https://github.com/blippy/rpi/tree/master/atlast
 #define REAL0	*((atl_real *) &S0)   /* First real on stack */
 #define REAL1	*((atl_real *) &S1)   /* Second real on stack */
 #define REAL2	*((atl_real *) &S2)   /* Third real on stack */

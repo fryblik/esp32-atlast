@@ -23,32 +23,6 @@ size_t filled = 0;
 
 
 /**
- * Read serial
- * 
- * Store chars from serial input into inputString buffer.
- * Returns true if a complete line has been read, false otherwise.
- */
-bool readSerial() {
-    while (Serial.available() && filled < 256) {
-        // Read byte from buffer:
-        char inChar = (char)Serial.read();
-
-        // Add byte to inputString:
-        inputString[filled] = inChar;
-        
-        // Terminate on newline:
-        if (inChar == '\n' && filled > 0) {
-            inputString[filled] = '\0';
-            filled = 0;
-            return true;
-        }
-
-        filled++;
-    }
-    return false;
-}
-
-/**
  * Load config
  * 
  * Deserialize and load configuration from config.json.
@@ -74,6 +48,32 @@ bool loadConfig() {
     // TODO: Load multiple WLAN configurations
 
     return true;
+}
+
+/**
+ * Read serial
+ * 
+ * Store chars from serial input into inputString buffer.
+ * Returns true if a complete line has been read, false otherwise.
+ */
+bool readSerial() {
+    while (Serial.available() && filled < 256) {
+        // Read byte from buffer:
+        char inChar = (char)Serial.read();
+
+        // Add byte to inputString:
+        inputString[filled] = inChar;
+        
+        // Terminate on newline:
+        if (inChar == '\n' && filled > 0) {
+            inputString[filled] = '\0';
+            filled = 0;
+            return true;
+        }
+
+        filled++;
+    }
+    return false;
 }
 
 void setup() {
