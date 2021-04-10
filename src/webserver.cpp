@@ -284,7 +284,7 @@ void incomingData(uint8_t* inputData, size_t len) {
 void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     String data = doc["data"];
     // TODO: length unneeded?
-    incomingText(data.c_str(), data.length());
+    incomingText(&data[0], data.length());
 }
 
 /**

@@ -1,30 +1,30 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
+#include <queue>
 
 #define CODE_BUFF_SIZE 1000
 
 
-// Run data
+// Run Data
 struct runData {
-    String filename;
-    File codeFile;
-    char codeBuff[CODE_BUFF_SIZE]; // buffer for current line of code
+    std::queue<std::string> commands;
     bool startFlag;
     volatile bool killFlag;
     bool isRunning;
 };
 extern struct runData rd;
 
-// Run data mutex
+// Run Data mutex
 extern SemaphoreHandle_t atlastRunMutex;
 
 
 /**
  * ATLAST program
  * 
- * Execute ATLAST code from file in own task.
+ * Execute ATLAST commands when available.
+ * Run in a separate task.
  */
-void atlastFromFile(void * pvParameter);
+void atlastInterpreterLoop(void * pvParameter);
 
 /**
  * Evaluate ATLAST

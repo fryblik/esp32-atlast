@@ -44,7 +44,7 @@ bool loadConfig() {
     strcpy(wlanConf.ssid, doc["networks"][0]["ssid"]);
     strcpy(wlanConf.password, doc["networks"][0]["password"]);
 
-    // TODO: Load multiple WLAN configurations
+    // TODO: Load multiple WLAN configurations?
 
     return true;
 }
@@ -84,9 +84,13 @@ void setup() {
         abort();
     }
 
-    // Load config.json
-    // TODO: handle false return
-    loadConfig();
+    // Load config.json, on fail ask through serial
+    if (!loadConfig()) {
+        Serial.println("Enter SSID:");
+        strcpy(wlanConf.ssid, &Serial.readString()[0]);
+        Serial.println("Enter password");
+        strcpy(wlanConf.password, &Serial.readString()[0]);
+    }
 
     // Connect to access point
     connectWLAN(wlanConf.ssid, wlanConf.password);

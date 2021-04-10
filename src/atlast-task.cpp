@@ -3,22 +3,22 @@
 #include "multi-io.h"
 
 
-// Run data
+// Run Data
 struct runData rd;
 
-// Run data mutex
+// Run Data mutex
 // TODO: rework to use faster task notifications instead?
 SemaphoreHandle_t atlastRunMutex = xSemaphoreCreateMutex();
 
 
 /**
- * Start ATLAST from file
+ * Start ATLAST run
  * 
  * Check start flag. If true, start execution. Otherwise wait a bit.
  * Keeps mutex on success.
  * Returns true on program start, false otherwise.
  */
-bool startAtlastFromFile() {
+bool startAtlastRun() {
     // Take mutex
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
 
@@ -36,12 +36,11 @@ bool startAtlastFromFile() {
 }
 
 /**
- * Reset ATLAST from file
+ * Reset ATLAST run
  * 
- * Close file, reset run data and give back mutex.
+ * Close file, reset Run Data and give back mutex.
  */
-void resetAtlastFromFile() {
-    rd.codeFile.close();
+void resetAtlastRun() {
     rd.isRunning = false;
     rd.killFlag = false;
     xSemaphoreGive(atlastRunMutex);
@@ -50,20 +49,21 @@ void resetAtlastFromFile() {
 /**
  * ATLAST program
  * 
- * Execute ATLAST code from file in own task.
+ * Execute ATLAST commands when available.
+ * Run in a separate task.
  */
-void atlastFromFile(void * pvParameter) {
+void atlastInterpreterLoop(void * pvParameter) {
     // TODO: atl_mark, atl_unwind
+    // TODO: give mutex to allow adding commands to queue in ATLAST.C?
 
     // Wait for execution
     while(true) {
         // If not ready to start, try again
-        if (!startAtlastFromFile())
+        if (!startAtlastRun())
             continue;
 
-        // Execute code in file line by line
-        rd.codeFile = SPIFFS.open(rd.filename);
-        while (rd.codeFile.available()) {
+        // Execute commands stored in Run Data
+        while (!rd.commands.empty()) {
             // On KILL flag abort execution
             if (rd.killFlag){
                 atl_eval("ABORT");
@@ -71,28 +71,15 @@ void atlastFromFile(void * pvParameter) {
                 break;
             }
 
-            // Read line of code and evaluate
-            size_t len = rd.codeFile.readBytesUntil('\n', rd.codeBuff, CODE_BUFF_SIZE);
-            if (len < CODE_BUFF_SIZE) {
-                // Terminate buffer
-                rd.codeBuff[len] = '\0';
-
-                // DEBUG: Print code line (use "1 TRACE"?)
-                multiPrintf("<> %s\n", rd.codeBuff);
-
-                // Evaluate and print response
-                atl_eval(rd.codeBuff);
-                multiPrintf("\n  ok\n");
-            } else {
-                // Buffer overflow - exit program
-                multiPrintf("ATLAST RUNTIME ERROR: Too long code line in %s. Exiting.\n", rd.filename);
-                break;
-            }
+            // Evaluate and pop string in front of queue and print response
+            atl_eval(&rd.commands.front()[0]);
+            rd.commands.pop();
+            multiPrintf("\n  ok\n");
+            
         }
-        // TODO: Wait for input before exiting without kill?
 
-        // Close file, reset run data and give back mutex
-        resetAtlastFromFile(); 
+        // Reset run data and give back mutex
+        resetAtlastRun(); 
     }
 }
 
@@ -103,18 +90,18 @@ void atlastFromFile(void * pvParameter) {
  */
 void atlastCommand(char* command) {
     // TODO: kill (BREAK)
-    // TODO: mutex
-    // TODO: ATLAST from console, if program not running
-    // TODO: (in which source file?) file management with mutex
 
+    // Take mutex
+    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
 
-    // TODO: replace using Run Data? old way:
-	// Print incoming command
+    // Print incoming command
 	multiPrintf("> %s\n", command);
+    // Append command to Run Data and start execution
+    rd.commands.push(command);
+    rd.startFlag = true;
 
-	// Evaluate and print response
-	atl_eval(command);
-	multiPrintf("\n  ok\n");
+    // Give back mutex
+    xSemaphoreGive(atlastRunMutex);
 }
 
 /**
@@ -127,14 +114,20 @@ void initAtlast() {
     //atl_init(); // Redundant with PROLOGUE package active
 
     // DEBUG: List SPIFFS files in CLI
-    printFileList();
+    //printFileList();
 
-    // TODO: Test ATLAST from file task
+    // Create ATLAST interpreter task
+    xTaskCreate(&atlastInterpreterLoop, "atl_from_file", 65536, NULL, 5, NULL);
+
+    // Run ATLAST source file "/atl/run-on-startup.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.filename = "/www/run-on-startup.atl";
-    xTaskCreate(&atlastFromFile, "atl_from_file", 65536, NULL, 5, NULL);
+    rd.commands.push("1 trace"); // DEBUG
+    rd.commands.push("file startupfile");
+    rd.commands.push("\"/atl/run-on-startup.atl\" 1 startupfile fopen");
+    rd.commands.push("startupfile fload");
+    rd.commands.push("startupfile fclose");
     rd.startFlag = true;
     xSemaphoreGive(atlastRunMutex);
 }
 
-// TODO: Websocket queue is limited to 16 -> buffering needed (try WORDSUNUSED to see behavior)
+// TODO: Outgoing websocket queue is limited to 16 messages -> buffering needed (try WORDSUNUSED to see behavior)
