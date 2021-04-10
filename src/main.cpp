@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <ESPmDNS.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
 #include <WebSocketsServer.h>
@@ -94,9 +93,6 @@ void setup() {
 
     // Start web server
     setupWebServer();
-
-    // Start mDNS responder (esp.local)
-    MDNS.begin("ESP");
 
     // TODO: Make possible use without WLAN
 

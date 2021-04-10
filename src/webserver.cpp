@@ -1,9 +1,10 @@
-#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPmDNS.h>
 #include <SPIFFS.h>
 
 #include "multi-io.h"
 #include "webserver.h"
+
 
 // Webserver globals
 AsyncWebServer server(80);
@@ -95,7 +96,7 @@ void parseReceived(void * arg, uint8_t *data, size_t len) {
                 return;
             }
             // Handle received JSON
-            incomingJSON((char*) data, (size_t) info->len);
+            incomingJson((char*) data, (size_t) info->len);
 
         } else if (info->opcode == WS_BINARY) {
             // Single-frame binary data
@@ -131,7 +132,7 @@ void connectWLAN(const char* ssid, const char* password) {
 /**
  * Setup web server
  * 
- * Setup websocket, start the server, configure hosting files in SPIFFS.
+ * Setup websocket, start the server, configure file hosting and mDNS.
  */
 void setupWebServer() {
     // Setup websocket
@@ -145,6 +146,9 @@ void setupWebServer() {
     // Serve all files in SPIFFS
     // Request to the root serves "index.html"
     server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+    // Start mDNS responder with "esp" hostname (esp.local)
+    MDNS.begin("esp");
 }
 
 /**
@@ -156,7 +160,7 @@ void setupWebServer() {
 void wsSendText(const char * data) {
     if(currentClient && currentClient->status() == WS_CONNECTED) {
         // Allocate JSON document and add elements
-        StaticJsonDocument<384> doc;
+        StaticJsonDocument<STATIC_JSON_SIZE> doc;
         doc["type"] = "cli";
         doc["data"] = data;
 
@@ -271,14 +275,81 @@ void incomingData(uint8_t* inputData, size_t len) {
 }
 
 /**
+ * Incoming JSON CLI
+ * 
+ * Handle incoming CLI input.
+ */
+void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
+    String data = doc["data"];
+    // TODO: length unneeded?
+    incomingText(data.c_str(), data.length());
+}
+
+/**
+ * Incoming JSON file list
+ * 
+ * Handle incoming file list request.
+ */
+void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
+    multiPrintf("DEBUG: Requested file list\n");
+    wsSendFileList();
+}
+
+/**
+ * Incoming JSON upload
+ * 
+ * Handle incoming file upload request.
+ */
+void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
+    // Check file size
+    size_t fileSize = doc["size"];
+    if (fileSize > 128) { // TODO: change size limit
+        wsSendAck("upload", "tooLarge", "");
+        return;
+    }
+
+    // Get file name
+    const char * fileName = (const char*) doc["name"];
+    // Check file name length (SPIFFS limits to 31)
+    if (sizeof(fileName) > 30) {
+        multiPrintf("TRUNCATED FILENAME: \"%s\" was longer than 30 characters", fileName);
+    }
+    // Update global path variable (preserve leading slash)
+    strncpy(&nextPath[1], fileName, 30);
+
+    // Send approval of download
+    wsSendAck("upload", "ready", &nextPath[1]);
+    multiPrintf("DEBUG: Ready to receive file: %s\n", nextPath);
+}
+
+/**
+ * Incoming JSON delete
+ * 
+ * Handle incoming file deletion request.
+ */
+void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
+    // Get file path
+    const char * path = (const char*) doc["path"];
+    if (removeFile(path)) {
+        // File is no more
+        wsSendAck("delete", "ok", &path[1]);
+        multiPrintf("DEBUG: File \"%s\" deleted\n", path);
+    } else {
+        // Couldn't delete protected file
+        wsSendAck("delete", "protected", &path[1]);
+    }
+}
+
+/**
  * Incoming JSON
  * 
  * Parse and handle incoming JSON document.
  * Maximum input length is 256.
+ * TODO: len unneeded?
  */
-void incomingJSON(const char* inputData, size_t len) {
+void incomingJson(const char* inputData, size_t len) {
     // Deserialize received JSON document
-    StaticJsonDocument<384> doc;
+    StaticJsonDocument<STATIC_JSON_SIZE> doc;
     DeserializationError err = deserializeJson(doc, inputData);
     if (err) {
         multiPrintf("JSON deserialization error: %s\n", err);
@@ -287,51 +358,12 @@ void incomingJSON(const char* inputData, size_t len) {
 
     // Decide message type
     if (doc["type"] == "cli") {
-        // CLI input
-        // TODO: length unneeded?
-        String data = doc["data"];
-        incomingText(data.c_str(), data.length());
-
+        incomingJsonCli(doc);
     } else if (doc["type"] == "fileList") {
-        // File list requested
-        multiPrintf("DEBUG: Requested file list\n");
-        wsSendFileList();
-
+        incomingJsonFileList(doc);
     } else if (doc["type"] == "upload") {
-        // File upload requested
-
-        // Check file size
-        size_t fileSize = doc["size"];
-        if (fileSize > 128) { // TODO: change size limit
-            wsSendAck("upload", "tooLarge", "");
-            return;
-        }
-
-        // Get file name
-        const char * fileName = (const char*) doc["name"];
-        // Check file name length (SPIFFS limits to 31)
-        if (sizeof(fileName) > 30) {
-            multiPrintf("TRUNCATED FILENAME: \"%s\" was longer than 30 characters", fileName);
-        }
-        // Update global path variable (preserve leading slash)
-        strncpy(&nextPath[1], fileName, 30);
-
-        // Send approval of download
-        wsSendAck("upload", "ready", &nextPath[1]);
-        multiPrintf("DEBUG: Ready to receive file: %s\n", nextPath);
-
+        incomingJsonUpload(doc);
     } else if (doc["type"] == "delete") {
-        // File deletion request
-        
-        // Get file path
-        const char * path = (const char*) doc["path"];
-        if (removeFile(path)) {
-            // File is no more
-            wsSendAck("delete", "ok", &path[1]);
-            multiPrintf("DEBUG: File \"%s\" deleted\n", path);
-        } else {
-            // Couldn't delete protected file
-            wsSendAck("delete", "protected", &path[1]);
-        }
+        incomingJsonDelete(doc);
     }
 }

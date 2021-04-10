@@ -1,3 +1,7 @@
+#include <ArduinoJson.h>
+
+#define STATIC_JSON_SIZE 384
+
 /**
  * Parse received
  * 
@@ -56,8 +60,36 @@ bool removeFile(const char * path);
 void incomingData(uint8_t* inputData, size_t len);
 
 /**
+ * Incoming JSON CLI
+ * 
+ * Handle incoming CLI input.
+ */
+void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON file list
+ * 
+ * Handle incoming file list request.
+ */
+void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON upload
+ * 
+ * Handle incoming file upload request.
+ */
+void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON delete
+ * 
+ * Handle incoming file deletion request.
+ */
+void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
  * Incoming JSON
  * 
  * Parse and handle incoming JSON document.
  */
-void incomingJSON(const char* inputData, size_t len);
+void incomingJson(const char* inputData, size_t len);

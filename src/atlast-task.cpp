@@ -137,4 +137,4 @@ void initAtlast() {
     xSemaphoreGive(atlastRunMutex);
 }
 
-// TODO: Throttle evaluation, if websocket queue is getting full (try WORDSUSED to see behavior)
+// TODO: Websocket queue is limited to 16 -> buffering needed (try WORDSUNUSED to see behavior)

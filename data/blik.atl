@@ -1,0 +1,5 @@
+\ Blinking green LED 3 times:
+: 1s 1000 delay-ms ;
+g-led output: led
+: blik led on 1s led off 1s ;
+blik blik blik
