@@ -131,7 +131,7 @@ void initAtlast() {
 
     // TODO: Test ATLAST from file task
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.filename = "/run-on-startup.atl";
+    rd.filename = "/www/run-on-startup.atl";
     xTaskCreate(&atlastFromFile, "atl_from_file", 65536, NULL, 5, NULL);
     rd.startFlag = true;
     xSemaphoreGive(atlastRunMutex);

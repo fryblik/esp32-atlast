@@ -30,7 +30,7 @@ size_t filled = 0;
  */
 bool loadConfig() {
     // Open configuration file
-    File confFile = SPIFFS.open("/config.json");
+    File confFile = SPIFFS.open("/cfg/config.json");
 
     // Allocate JSON document and deserialize
     DynamicJsonDocument doc(2048);

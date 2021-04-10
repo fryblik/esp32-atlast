@@ -16,12 +16,12 @@ char nextPath[32] = "/";
 // File paths not to be deleted/overwritten
 std::vector<std::string> corePaths {
     "/",
-    "/index.html",
-    "/jquery-3.5.1.js",
-    "/ws.js",
-    "/FileSaver.js",
-    "/style.css",
-    "/favicon.ico"
+    "/www/index.html",
+    "/www/jquery-3.5.1.js",
+    "/www/ws.js",
+    "/www/FileSaver.js",
+    "/www/style.css",
+    "/www/favicon.ico"
 };
 
 /**
@@ -144,8 +144,10 @@ void setupWebServer() {
     server.begin();
 
     // Serve all files in SPIFFS
-    // Request to the root serves "index.html"
-    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+    // Request to the root serves "www/index.html"
+    server.serveStatic("/", SPIFFS, "/").setDefaultFile("www/index.html");
+    // Redirect "/favicon.ico" to "/www/favicon.ico"
+    server.serveStatic("/favicon.ico", SPIFFS, "/www/favicon.ico");
 
     // Start mDNS responder with "esp" hostname (esp.local)
     MDNS.begin("esp");
