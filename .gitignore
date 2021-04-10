@@ -4,5 +4,5 @@
 .vscode/launch.json
 .vscode/ipch
 
-data/config.json
+data/cfg/config.json
 atlast-1.2.tar.gz
