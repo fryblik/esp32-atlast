@@ -78,8 +78,13 @@ function sendInput() {
 // Add message to history
 function updateCliOut(addition) {
 	let cliOut = $( '#cliOut' );
-	cliOut.append('<br>');
-	cliOut.append(addition);
+
+	// Show lines separated with <br> (filter out empty strings in split)
+	lines = addition.split('\n').filter(s => s);
+	$.each (lines, function(i, line) {
+		cliOut.append('<br>');
+		cliOut.append(line);
+	});
 
 	// Scroll to bottom
 	cliOut.scrollTop(Number.MAX_SAFE_INTEGER);

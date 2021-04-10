@@ -2,6 +2,10 @@
 
 #define STATIC_JSON_SIZE 384
 
+// Outgoing CLI text buffer and mutex
+extern std::string wsOutString;
+extern SemaphoreHandle_t wsOutMutex;
+
 /**
  * Parse received
  * 
@@ -27,6 +31,14 @@ void setupWebServer();
  * Send text message to the last connected websocket client.
  */
 void wsSendText(const char * data);
+
+/**
+ * Send CLI loop
+ * 
+ * Periodically send wsOutString to the last connected websocket client.
+ * Run in its own task.
+ */
+void wsSendCliLoop(void * pvParameter);
 
 /**
  * Send file list

@@ -110,14 +110,9 @@ void atlastCommand(char* command) {
  * Initiate Atlast and create interpreter task.
  */
 void initAtlast() {
-    // Initialize ATLAST interpreter
-    //atl_init(); // Redundant with PROLOGUE package active
-
-    // DEBUG: List SPIFFS files in CLI
-    //printFileList();
-
     // Create ATLAST interpreter task
-    xTaskCreate(&atlastInterpreterLoop, "atl_from_file", 65536, NULL, 5, NULL);
+    // TODO: Set reasonable stack size
+    xTaskCreate(&atlastInterpreterLoop, "atl_interpreter", 65536, NULL, 5, NULL);
 
     // Run ATLAST source file "/atl/run-on-startup.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);

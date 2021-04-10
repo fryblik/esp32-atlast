@@ -27,8 +27,10 @@ int multiPrintf(char* format, ...){
 	// Output serial
 	printf("%s", buffer);
 
-	// Output websocket
-	wsSendText(buffer);
+	// Add string to outgoing websocket buffer
+	xSemaphoreTake(wsOutMutex, portMAX_DELAY);
+	wsOutString.append(buffer);
+	xSemaphoreGive(wsOutMutex);
 
 	return length;
 }

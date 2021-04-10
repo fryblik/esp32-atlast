@@ -11,6 +11,10 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 AsyncWebSocketClient* currentClient;
 
+// Outgoing CLI text buffer and mutex
+std::string wsOutString;
+SemaphoreHandle_t wsOutMutex = xSemaphoreCreateMutex();
+
 // File path of next upload
 char nextPath[32] = "/";
 // File paths not to be deleted/overwritten
@@ -151,18 +155,22 @@ void setupWebServer() {
 
     // Start mDNS responder with "esp" hostname (esp.local)
     MDNS.begin("esp");
+
+    // Start the task handling websocket CLI output
+    // TODO: Set reasonable stack size
+    xTaskCreate(&wsSendCliLoop, "ws_cli_out", 8196, NULL, 5, NULL);
 }
 
 /**
  * Send text
  * 
  * Send CLI message JSON to the last connected websocket client.
- * Expects max data length: 256
+ * Approximate max data length slightly below doc size (~4000).
  */
 void wsSendText(const char * data) {
     if(currentClient && currentClient->status() == WS_CONNECTED) {
         // Allocate JSON document and add elements
-        StaticJsonDocument<STATIC_JSON_SIZE> doc;
+        DynamicJsonDocument doc(4096);
         doc["type"] = "cli";
         doc["data"] = data;
 
@@ -172,6 +180,53 @@ void wsSendText(const char * data) {
 
         // Send through websocket
         currentClient->text(output);
+    }
+}
+
+/**
+ * Send CLI loop
+ * 
+ * Periodically send wsOutString to the last connected websocket client.
+ * Run in its own task.
+ */
+void wsSendCliLoop(void * pvParameter) {
+    // Allocate JSON document to populate and send
+    DynamicJsonDocument doc(4096);
+
+    while (true) {
+        // Wait 10ms
+        vTaskDelay(10 / portTICK_RATE_MS);
+
+        if(currentClient && currentClient->status() == WS_CONNECTED) {
+            // Client is connected, take mutex and check string buffer
+            xSemaphoreTake(wsOutMutex, portMAX_DELAY);
+            if (wsOutString.empty()) {
+                // Nothing to send
+                xSemaphoreGive(wsOutMutex);
+                continue;
+            }
+
+            // Add elements to JSON document and clear string buffer
+            doc["type"] = "cli";            
+            doc["data"] = wsOutString; // TODO: check that a copy was made
+            wsOutString.clear();
+            
+            // Give back mutex
+            xSemaphoreGive(wsOutMutex);
+
+            // Serialize JSON document into a buffer and clear JSON doc
+            String output;
+            serializeJson(doc, output);
+            doc.clear();
+
+            // Send through websocket
+            currentClient->text(output);
+        } else {
+            // If no client is connected, throw away buffered output
+            xSemaphoreTake(wsOutMutex, portMAX_DELAY);
+            wsOutString.clear();
+            xSemaphoreGive(wsOutMutex);
+        }
     }
 }
 
