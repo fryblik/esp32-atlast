@@ -79,10 +79,14 @@ function sendInput() {
 function updateCliOut(addition) {
 	let cliOut = $( '#cliOut' );
 
-	// Show lines separated with <br> (filter out empty strings in split)
+	// Split message into lines, filter out empty strings
 	lines = addition.split('\n').filter(s => s);
+
+	// Show lines separated with <br>
 	$.each (lines, function(i, line) {
-		cliOut.append('<br>');
+		if (!cliOut.is(':empty')) {
+			cliOut.append('<br>');
+		}
 		cliOut.append(line);
 	});
 

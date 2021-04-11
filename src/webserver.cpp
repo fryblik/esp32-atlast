@@ -44,7 +44,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
             Serial.printf("[%u] Connection from ", client->id());
             Serial.println(client->remoteIP().toString());
             // Notify web CLI
-            client->text("{\"type\":\"cli\",\"data\":\"DEBUG: Websocket connection established.\"}");
+            client->text("{\"type\":\"cli\",\"data\":\"Websocket connection established.\"}");
 
             // Send SPIFFS file list (JSON array)
             wsSendFileList();

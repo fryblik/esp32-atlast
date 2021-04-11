@@ -72,8 +72,10 @@
 #define WALKBACK		      /* Walkback trace */
 #define WORDSUSED		      /* Logging of words used and unused */
 
-// ESP: prevent LoadStoreError when overwriting *(dw->wname) in lookup(): 
+// ESP: Prevent LoadStoreError when overwriting *(dw->wname) in lookup(): 
 #define READONLYSTRINGS
+// ESP: Enable memory usage monitor
+#define MEMSTAT
 
 #endif /* NOMEMCHECK */
 #endif /* !INDIVIDUALLY */

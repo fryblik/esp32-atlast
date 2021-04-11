@@ -127,7 +127,6 @@ void atlastInit() {
 
     // Run ATLAST source file "/atl/run-on-startup.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.commands.push("1 trace"); // DEBUG
     rd.commands.push("file startupfile");
     rd.commands.push("\"/atl/run-on-startup.atl\" 1 startupfile fopen");
     rd.commands.push("startupfile fload");
