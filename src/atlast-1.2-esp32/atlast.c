@@ -2725,7 +2725,7 @@ prim P_fwdresolve()		      /* Emit forward jump offset */
 #endif /* COMPILERW */
 
 // ESP: ESP32 words (blippy)
-// TODO: use atl_primdef
+// TODO: use atl_primdef()?
 #ifdef ESP32_PRIM
 
 prim P_hi() {   // simple greeting  

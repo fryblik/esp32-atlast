@@ -90,6 +90,14 @@ function updateCliOut(addition) {
 	cliOut.scrollTop(Number.MAX_SAFE_INTEGER);
 }
 
+// On button click, kill running ATLAST program
+function killProgram() {
+	// Send KILL request JSON
+	$( '#killButton' ).click(function() {
+		ws.send('{"type":"kill"}');
+	});
+}
+
 // Initiate file upload: click to select file and request upload
 function initUpload() {
 	const fileUpButton = $( '#fileUpButton' );
@@ -192,6 +200,7 @@ function updateFileList(paths) {
 }
 
 // Run these handlers when DOM is ready
+$(killProgram);
 $(sendInput);
 $(initUpload);
 $(downloadFile);

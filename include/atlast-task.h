@@ -27,15 +27,24 @@ extern SemaphoreHandle_t atlastRunMutex;
 void atlastInterpreterLoop(void * pvParameter);
 
 /**
- * Evaluate ATLAST
+ * ATLAST command
  * 
  * Evaluate ATLAST command.
  */
 void atlastCommand(char* command);
 
 /**
- * Init Atlast
+ * ATLAST init
  * 
  * Initiate Atlast and create interpreter task.
  */
-void initAtlast();
+void atlastInit();
+
+/**
+ * ATLAST kill
+ * 
+ * Sets KILL flag to clear interpreter command queue.
+ * Breaks running ATLAST program.
+ * Does not call ATLAST ABORT (that would reset ATLAST interpreter).
+ */
+void atlastKill();

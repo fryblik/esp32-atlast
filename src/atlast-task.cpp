@@ -38,11 +38,17 @@ bool startAtlastRun() {
 /**
  * Reset ATLAST run
  * 
- * Close file, reset Run Data and give back mutex.
+ * Reset Run Data and give back mutex.
  */
 void resetAtlastRun() {
-    rd.isRunning = false;
+    // Reset queue if nonempty
+    if (!rd.commands.empty()) {
+        std::queue<std::string> emptyQueue;
+        std::swap(rd.commands, emptyQueue);
+    }
+    rd.startFlag = false;
     rd.killFlag = false;
+    rd.isRunning = false;
     xSemaphoreGive(atlastRunMutex);
 }
 
@@ -50,47 +56,52 @@ void resetAtlastRun() {
  * ATLAST program
  * 
  * Execute ATLAST commands when available.
+ * Blocks atlastRunMutex.
  * Run in a separate task.
  */
 void atlastInterpreterLoop(void * pvParameter) {
-    // TODO: atl_mark, atl_unwind
+    // TODO: atl_load, atl_mark, atl_unwind
     // TODO: give mutex to allow adding commands to queue in ATLAST.C?
 
     // Wait for execution
     while(true) {
-        // If not ready to start, try again
+        // If not ready to start, waits and tries again
         if (!startAtlastRun())
             continue;
+        // Mutex is taken!
 
         // Execute commands stored in Run Data
         while (!rd.commands.empty()) {
-            // On KILL flag abort execution
+            // On KILL flag stop execution and reset Run Data
             if (rd.killFlag){
-                atl_eval("ABORT");
-                // TODO: Implement kill also inside running ATLAST loop (atl_break)
                 break;
             }
 
-            // Evaluate and pop string in front of queue and print response
+            // Evaluate and pop string in front of queue
             atl_eval(&rd.commands.front()[0]);
             rd.commands.pop();
+
+            // Give mutex momentarily to allow addition of commands to queue
+            xSemaphoreGive(atlastRunMutex);
+
+            // Print acknowledgement of executed command
             multiPrintf("\n  ok\n");
-            
+
+            // Take mutex again
+            xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
         }
 
-        // Reset run data and give back mutex
+        // Reset Run Data and give back mutex
         resetAtlastRun(); 
     }
 }
 
 /**
- * Evaluate ATLAST
+ * ATLAST command
  * 
  * Evaluate ATLAST command.
  */
 void atlastCommand(char* command) {
-    // TODO: kill (BREAK)
-
     // Take mutex
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
 
@@ -105,11 +116,11 @@ void atlastCommand(char* command) {
 }
 
 /**
- * Init Atlast
+ * ATLAST init
  * 
  * Initiate Atlast and create interpreter task.
  */
-void initAtlast() {
+void atlastInit() {
     // Create ATLAST interpreter task
     // TODO: Set reasonable stack size
     xTaskCreate(&atlastInterpreterLoop, "atl_interpreter", 65536, NULL, 5, NULL);
@@ -125,4 +136,16 @@ void initAtlast() {
     xSemaphoreGive(atlastRunMutex);
 }
 
-// TODO: Outgoing websocket queue is limited to 16 messages -> buffering needed (try WORDSUNUSED to see behavior)
+/**
+ * ATLAST kill
+ * 
+ * Sets KILL flag to reset Run Data.
+ * Breaks running ATLAST program.
+ * Does not call ATLAST ABORT (that would reset atlast.c itself).
+ */
+void atlastKill() {
+    // Set KILL flag for interpreter task
+    rd.killFlag = true;
+    // Set BREAK flag for running ATLAST program
+    atl_break();
+}

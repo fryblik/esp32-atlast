@@ -101,11 +101,10 @@ void setup() {
     // TODO: Make possible use without WLAN
 
     // Initialize ATLAST interpreter and create interpreter task
-    initAtlast();
+    atlastInit();
 }
 
 void loop() {
-    // Looks like SerialEvent isn't supported
     if (Serial.available()) {
         if(readSerial()) {
             // Once a whole line is read, handle received data

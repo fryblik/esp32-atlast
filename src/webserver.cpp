@@ -422,5 +422,7 @@ void incomingJson(const char* inputData, size_t len) {
         incomingJsonUpload(doc);
     } else if (doc["type"] == "delete") {
         incomingJsonDelete(doc);
+    } else if (doc["type"] == "kill") {
+        incomingKillReq();
     }
 }

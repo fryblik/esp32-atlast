@@ -8,8 +8,26 @@
 
 #cliIn {
 	width: 99.5%;
+	margin-bottom: 4px;
 }
 
 #fileUpDialog {
 	display: none;
+}
+
+#fileUpButton {
+	float: right;
+	margin-right: 4px;
+}
+
+#fileDelButton {
+	float: right;
+}
+
+#fileDnButton {
+	float: right;
+}
+
+#fileSelect {
+	float: right;
 }
