@@ -1,0 +1,38 @@
+\ Requires: run-on-startup.atl
+
+\ PWM variables
+variable pwm-duty
+variable pwm-offduty
+variable pwm-cycle
+variable pwm-pin
+variable pwm-duration
+
+
+\ Function: [pin] [duty ms] [cycle duration ms] PWM-INF
+: PWM-INF
+    pwm-cycle ! pwm-duty ! pwm-pin !    \ Save values from stack
+    pwm-cycle @ pwm-duty @ - \ Subtract pwm-duty value from pwm-cycle value
+    pwm-offduty !            \  and save the result to pwm-offduty
+    pwm-pin @ output pinm    \ Get pin number and set its mode to output
+    begin
+        pwm-pin @ on
+        pwm-duty @ delay-ms
+        pwm-pin @ off
+        pwm-offduty @ delay-ms
+    0 until                 \ Run PWM loop indefinitely
+;
+
+\ Function: [pin] [duty ms] [cycle duration ms] [approx. run duration ms] PWM
+: PWM
+    pwm-duration ! pwm-cycle ! pwm-duty ! pwm-pin ! \ Save values from stack
+    pwm-cycle @ pwm-duty @ -    \ Subtract pwm-duty value from pwm-cycle value
+    pwm-offduty !               \  and save the result to pwm-offduty
+    pwm-pin @ output pinm       \ Get pin number and set its mode to output
+    pwm-duration @ 0 do         \ Put duration value on stack and start loop
+        pwm-pin @ on
+        pwm-duty @ delay-ms
+        pwm-pin @ off
+        pwm-offduty @ delay-ms
+        pwm-cycle @             \ Put loop step on stack
+    +loop                       \ Run PWM loop
+;

@@ -53,7 +53,7 @@ void resetAtlastRun() {
 }
 
 /**
- * ATLAST program
+ * ATLAST interpreter loop
  * 
  * Execute ATLAST commands when available.
  * Blocks atlastRunMutex.
@@ -61,7 +61,6 @@ void resetAtlastRun() {
  */
 void atlastInterpreterLoop(void * pvParameter) {
     // TODO: atl_load, atl_mark, atl_unwind
-    // TODO: give mutex to allow adding commands to queue in ATLAST.C?
 
     // Wait for execution
     while(true) {
@@ -77,18 +76,25 @@ void atlastInterpreterLoop(void * pvParameter) {
                 break;
             }
 
-            // Evaluate and pop string in front of queue
-            atl_eval(&rd.commands.front()[0]);
-            rd.commands.pop();
+            // Get pointer to the string in front of queue
+            char *command = &rd.commands.front()[0];
 
-            // Give mutex momentarily to allow addition of commands to queue
+            // Give mutex during execution to allow addition of commands to queue
+            // DIRTY: rd.commands.pop() must not be called in the meantime!!!
+            // TODO: Maybe use strcpy instead of pointing to string in queue?
             xSemaphoreGive(atlastRunMutex);
 
-            // Print acknowledgement of executed command
-            multiPrintf("\n  ok\n");
+            // Evaluate string in front of queue
+            atl_eval(command);
 
             // Take mutex again
             xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
+
+            // Remove front string from queue
+            rd.commands.pop();
+
+            // Print acknowledgement of executed command
+            multiPrintf("\n  ok\n");
         }
 
         // Reset Run Data and give back mutex

@@ -19,7 +19,7 @@ extern SemaphoreHandle_t atlastRunMutex;
 
 
 /**
- * ATLAST program
+ * ATLAST interpreter loop
  * 
  * Execute ATLAST commands when available.
  * Run in a separate task.

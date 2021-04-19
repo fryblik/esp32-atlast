@@ -2752,7 +2752,7 @@ prim P_digr() { // read from pin
   S0 = s;
 }
 
-prim P_delay_ms() { // delay
+prim P_delay_ms() { // delay in ms (shorter periods would require busy wait)
   Sl(1);
   delay(S0);
   Pop;
