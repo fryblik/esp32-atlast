@@ -2,6 +2,7 @@
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
 
+#include "atlast-task.h"
 #include "multi-io.h"
 #include "webserver.h"
 
@@ -398,6 +399,19 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
 }
 
 /**
+ * Incoming JSON kill
+ * 
+ * Handle incoming ATLAST kill request.
+ */
+void incomingJsonKill(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
+    // Get ATLAST task restart parameter
+    bool restartTask = doc["restartTask"];
+    multiPrintf("DEBUG: restartTask %d\n", restartTask);
+
+    atlastKill(restartTask);
+}
+
+/**
  * Incoming JSON
  * 
  * Parse and handle incoming JSON document.
@@ -423,6 +437,6 @@ void incomingJson(const char* inputData, size_t len) {
     } else if (doc["type"] == "delete") {
         incomingJsonDelete(doc);
     } else if (doc["type"] == "kill") {
-        incomingKillReq();
+        incomingJsonKill(doc);
     }
 }

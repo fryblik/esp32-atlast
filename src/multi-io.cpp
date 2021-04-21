@@ -52,15 +52,6 @@ void incomingText(const char* inputData, size_t len) {
 }
 
 /**
- * Incoming KILL req
- * 
- * Handle program KILL request.
- */
-void incomingKillReq() {
-	atlastKill();
-}
-
-/**
  * Print file list
  * 
  * List all files in CLI.

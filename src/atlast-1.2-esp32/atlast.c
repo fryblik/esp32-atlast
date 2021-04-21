@@ -2730,10 +2730,6 @@ prim P_fwdresolve()		      /* Emit forward jump offset */
 // TODO: use atl_primdef()?
 #ifdef ESP32_PRIM
 
-prim P_hi() {   // simple greeting  
-    printf("Hi!");
-}
-
 prim P_pinm() { // set pin mode
   Sl(2);
   pinMode(S1, S0);
@@ -2754,7 +2750,9 @@ prim P_digr() { // read from pin
 
 prim P_delay_ms() { // delay in ms (shorter periods would require busy wait)
   Sl(1);
-  delay(S0);
+  if ((long) S0 >= 0) {    // prevent extreme task delay on negative argument
+    delay(S0);
+  }
   Pop;
 }
 
@@ -3017,7 +3015,6 @@ static struct primfcn primt[] = {
 
 // ESP: blippy
 #ifdef ESP32_PRIM
-    {"0HI", P_hi},
     {"0PINM", P_pinm},
     {"0DIGW", P_digw},
     {"0DIGR", P_digr},

@@ -2,7 +2,9 @@
 #include <SPIFFS.h>
 #include <queue>
 
-#define CODE_BUFF_SIZE 1000
+#include "atlast-1.2-esp32/atldef.h"
+
+#define ATL_TASK_NAME "atl"
 
 
 // Run Data
@@ -11,11 +13,13 @@ struct runData {
     bool startFlag;
     volatile bool killFlag;
     bool isRunning;
+    atl_statemark mk;   // TODO: unused
 };
 extern struct runData rd;
 
 // Run Data mutex
 extern SemaphoreHandle_t atlastRunMutex;
+extern TaskHandle_t atlastTaskHandle;
 
 
 /**
@@ -34,6 +38,11 @@ void atlastInterpreterLoop(void * pvParameter);
 void atlastCommand(char* command);
 
 /**
+ * ATLAST create task
+ */
+void atlastCreateTask();
+
+/**
  * ATLAST init
  * 
  * Initiate Atlast and create interpreter task.
@@ -45,6 +54,7 @@ void atlastInit();
  * 
  * Sets KILL flag to clear interpreter command queue.
  * Breaks running ATLAST program.
+ * Restarts ATLAST in new task if requested.
  * Does not call ATLAST ABORT (that would reset ATLAST interpreter).
  */
-void atlastKill();
+void atlastKill(bool restartTask);

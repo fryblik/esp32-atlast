@@ -6,29 +6,30 @@
 // Run Data
 struct runData rd;
 
-// Run Data mutex
+// Run Data mutex and task handle
 // TODO: rework to use faster task notifications instead?
 SemaphoreHandle_t atlastRunMutex = xSemaphoreCreateMutex();
+TaskHandle_t atlastTaskHandle = nullptr;
 
 
 /**
  * Start ATLAST run
  * 
  * Check start flag. If true, start execution. Otherwise wait a bit.
- * Keeps mutex on success.
  * Returns true on program start, false otherwise.
  */
 bool startAtlastRun() {
     // Take mutex
-    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
+    xSemaphoreTake(atlastRunMutex, portMAX_DELAY);    
 
     if (rd.startFlag) {
-        // Start execution
+        // Start execution and release mutex
         rd.startFlag = false;
         rd.isRunning = true;
+        xSemaphoreGive(atlastRunMutex);
         return true;
     } else {
-        // Give back mutex and wait for next try
+        // Release mutex and wait for next try
         xSemaphoreGive(atlastRunMutex);
         vTaskDelay(100 / portTICK_RATE_MS);
         return false;
@@ -38,7 +39,7 @@ bool startAtlastRun() {
 /**
  * Reset ATLAST run
  * 
- * Reset Run Data and give back mutex.
+ * Reset Run Data and release mutex.
  */
 void resetAtlastRun() {
     // Reset queue if nonempty
@@ -67,19 +68,21 @@ void atlastInterpreterLoop(void * pvParameter) {
         // If not ready to start, waits and tries again
         if (!startAtlastRun())
             continue;
-        // Mutex is taken!
+        
+        // Take mutex
+        xSemaphoreTake(atlastRunMutex, portMAX_DELAY); 
 
         // Execute commands stored in Run Data
         while (!rd.commands.empty()) {
             // On KILL flag stop execution and reset Run Data
-            if (rd.killFlag){
+            if (rd.killFlag) {
                 break;
             }
 
             // Get pointer to the string in front of queue
             char *command = &rd.commands.front()[0];
 
-            // Give mutex during execution to allow addition of commands to queue
+            // Release mutex during execution to allow addition of commands to queue
             // DIRTY: rd.commands.pop() must not be called in the meantime!!!
             // TODO: Maybe use strcpy instead of pointing to string in queue?
             xSemaphoreGive(atlastRunMutex);
@@ -97,7 +100,7 @@ void atlastInterpreterLoop(void * pvParameter) {
             multiPrintf("\n  ok\n");
         }
 
-        // Reset Run Data and give back mutex
+        // Reset Run Data and release mutex
         resetAtlastRun(); 
     }
 }
@@ -113,12 +116,29 @@ void atlastCommand(char* command) {
 
     // Print incoming command
 	multiPrintf("> %s\n", command);
+    // TODO: remove this
+    multiPrintf("DEBUG: Queue size: %d, start: %d, kill: %d, running: %d\n", rd.commands.size(), rd.startFlag, rd.killFlag, rd.isRunning);
     // Append command to Run Data and start execution
     rd.commands.push(command);
-    rd.startFlag = true;
+    if (!rd.isRunning) {
+        rd.startFlag = true;
+    }
 
-    // Give back mutex
+    // Release mutex
     xSemaphoreGive(atlastRunMutex);
+}
+
+/**
+ * ATLAST create task
+ */
+void atlastCreateTask() {
+    // Create ATLAST interpreter task
+    xTaskCreate(&atlastInterpreterLoop,
+                ATL_TASK_NAME,
+                65536, // TODO: Set reasonable stack size
+                NULL,
+                5,
+                &atlastTaskHandle); // Store task handle
 }
 
 /**
@@ -128,10 +148,10 @@ void atlastCommand(char* command) {
  */
 void atlastInit() {
     // Create ATLAST interpreter task
-    // TODO: Set reasonable stack size
-    xTaskCreate(&atlastInterpreterLoop, "atl_interpreter", 65536, NULL, 5, NULL);
+    atlastCreateTask();
 
     // Run ATLAST source file "/atl/run-on-startup.atl"
+    // atl_init() is called automatically with first command
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
     rd.commands.push("file startupfile");
     rd.commands.push("\"/atl/run-on-startup.atl\" 1 startupfile fopen");
@@ -146,11 +166,40 @@ void atlastInit() {
  * 
  * Sets KILL flag to reset Run Data.
  * Breaks running ATLAST program.
- * Does not call ATLAST ABORT (that would reset atlast.c itself).
+ * Restarts ATLAST in new task if requested.
+ * Does not call ATLAST ABORT (that would reset atlast.c state itself).
  */
-void atlastKill() {
-    // Set KILL flag for interpreter task
-    rd.killFlag = true;
-    // Set BREAK flag for running ATLAST program
-    atl_break();
+void atlastKill(bool restartTask) {
+    if (rd.isRunning) {
+        // Set KILL flag for interpreter task
+        rd.killFlag = true;
+
+        // Set BREAK flag for atl_exec
+        atl_break();
+    }
+
+    // Restart ATLAST task if requested
+    if (restartTask) {
+        // Prevent passing NULL below (would suspend and delete calling task)
+        if (!atlastTaskHandle) {
+            multiPrintf("ERROR: Task handle is NULL, cannot restart task.\n");
+            return;
+        }
+
+        // Suspend and delete task
+        vTaskSuspend(atlastTaskHandle);
+        vTaskDelete(atlastTaskHandle);
+
+        // Wait for the task to be deleted
+        do {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        } while (!strcmp(pcTaskGetTaskName(atlastTaskHandle), ATL_TASK_NAME));
+
+        resetAtlastRun();
+        atlastCreateTask();
+
+        // Clear return stack before anything else (keeps data stack)
+        rd.commands.push("quit");
+        rd.startFlag = true;
+    }
 }

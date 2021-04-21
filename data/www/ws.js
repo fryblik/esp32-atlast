@@ -96,9 +96,13 @@ function updateCliOut(addition) {
 
 // On button click, kill running ATLAST program
 function killProgram() {
-	// Send KILL request JSON
+	// Send KILL request JSON, include parameter from checkbox
 	$( '#killButton' ).click(function() {
-		ws.send('{"type":"kill"}');
+		if ($( '#restartTaskBox ').is(':checked')) {
+			ws.send('{"type":"kill","restartTask":1}');
+		} else {
+			ws.send('{"type":"kill","restartTask":0}');
+		}
 	});
 }
 
