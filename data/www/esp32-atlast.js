@@ -11,7 +11,7 @@ ws.onmessage = function(event) {
 	// Parse received JSON
 	let obj = JSON.parse(event.data);
 
-	// DEBUG
+	// TODO: DEBUG
 	console.log(obj);
 
 	// Decide message type
@@ -162,7 +162,7 @@ function downloadFile() {
 		let path = selection.text();
 		// Remove leading slash from path to get filename
 		let filename = path.substring(1);
-		// Download
+		// Download (FileSaver.js)
 		saveAs(path, filename);
 	});
 }
@@ -207,9 +207,34 @@ function updateFileList(paths) {
    });
 }
 
-// Run these handlers when DOM is ready
+
+/////////////////////////// Code editor ////////////////////////////
+
+function initEditor() {
+	// let editor = new CodeFlask('#editorArea', {
+	// 	language: 'forth',	// No highlighting available = effectively none
+	// 	lineNumbers: true
+	// });
+	
+	// // Update contents
+	// let newCode = String.raw `sample
+	// 	code`;
+	// editor.updateCode(newCode);
+	
+	// // TODO: actions on code update?
+	// // debug only, remove:
+	// editor.onUpdate(updatedCode => { console.log(updatedCode) });
+
+	// // Get code:
+	// let code = editor.getCode();
+}
+
+
+/////////////// Run these handlers when DOM is ready ///////////////
+
 $(killProgram);
 $(sendInput);
 $(initUpload);
 $(downloadFile);
 $(deleteFile);
+$(initEditor);

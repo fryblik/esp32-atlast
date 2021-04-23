@@ -1,34 +1,57 @@
-#cliOut {
+.contentBox {
+    display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.cliWindow {
+	display: flex;
+	flex-direction: column;
 	width: 100%;
 	height: 300px;
 	border: 1px solid #000;
 	background: #EEE;
+	margin-bottom: 4px;
+	font-family:'Courier New';
+}
+
+#cliOut {
+	position: relative;
+	height: 100%;
 	overflow: auto;
 	white-space: pre;
 }
 
 #cliIn {
-	width: 99.5%;
-	margin-bottom: 4px;
+    border: none;
 }
 
 #fileUpDialog {
 	display: none;
 }
 
-#fileUpButton {
-	float: right;
+.atlastControls {
 	margin-right: 4px;
 }
 
-#fileDelButton {
-	float: right;
+.fileControls {
+	margin-right: 4px;
 }
 
-#fileDnButton {
-	float: right;
+.editorArea {
+	position: relative;
+	width: 100%;
+	height: 300px;
 }
 
-#fileSelect {
-	float: right;
+.editor {
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    height: 340px;
+    letter-spacing: normal;
+    line-height: 20px;
+    padding: 10px;
+    tab-size: 4;
 }

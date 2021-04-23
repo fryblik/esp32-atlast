@@ -4,33 +4,67 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Test WebSocket Interface</title>
 	<link rel="stylesheet" href="www/style.css">
-	<script src="www/jquery-3.5.1.js"></script>
-	<script src='www/FileSaver.js'></script>
+	<script src="www/jquery-3.5.1.min.js"></script>
 	<!--All jQuery scripts go below this line-->
-	<script src='www/ws.js'></script>
+	<script src='www/FileSaver.min.js'></script>
+	<script src='www/esp32-atlast.js'></script>
+
+	<!--Syntax highlighter (CodeMirror)-->
+	<script src="www/runmode-standalone.min.js"></script>
+	<script src="www/forth.min.js"></script>
+	<link rel="stylesheet" href="www/dracula.css">
 </head>
 <body>
 	<h1>ESP32 ATLAST</h1>
-	<!--ATLAST FORTH shell-->
-	<div id="cliOut"></div>
-	<input id="cliIn" type="text">
+	<div class="contentBox">
 
-	<!--Program KILL button-->
-	<button id="killButton">Kill program</button>
-	<!--Restart ATLAST task checkbox-->
-	<input type="checkbox" id="restartTaskBox"/>
-	<label for="restartTaskBox">Also restart ATLAST</label>
+		<!--ATLAST FORTH shell-->
+		<div class="cliWindow">
+			<div id="cliOut"></div>
+			<input id="cliIn" type="text">
+		</div>
 
-	<!--File delete button-->
-	<button id="fileDelButton">Delete file</button>
-	<!--File download button-->
-	<button id="fileDnButton">Download file</button>
-	<!--File list-->
-	<select name="fileSelect" id="fileSelect">
-		<option disabled selected>No file list received.</option>
-	</select>
-	<!--File upload button-->
-	<input id="fileUpDialog" type="file">
-	<button id="fileUpButton">Upload file...</button>
+		<!--ATLAST controls-->
+		<div class="atlastControls">
+			<!--Program KILL button-->
+			<button id="killButton">Kill program</button>
+			<!--Restart ATLAST task checkbox-->
+			<input type="checkbox" id="restartTaskBox"/>
+			<label for="restartTaskBox">Also restart ATLAST</label>
+		</div>
+
+		<!--File controls-->
+		<div class="fileControls">
+			<!--File upload button-->
+			<input id="fileUpDialog" type="file">
+			<button id="fileUpButton">Upload file...</button>
+			<!--File list-->
+			<select name="fileSelect" id="fileSelect">
+				<option disabled selected>No file list received.</option>
+			</select>
+			<!--File download button-->
+			<button id="fileDnButton">Download file</button>
+			<!--File delete button-->
+			<button id="fileDelButton">Delete file</button>
+		</div>
+
+		<!--ATLAST FORTH editor (CodeJar)-->
+		<h3>Code editor</h3>
+		<!--Using CodeMirror CSS-->
+		<div class="editor cm-s-dracula CodeMirror"></div>
+		<!--CodeJar-->
+		<script type="module" id="code">
+			import {CodeJar} from "/www/codejar.min.js"
+			import {withLineNumbers} from '/www/linenumbers.min.js';
+			const hl = editor => {
+				CodeMirror.runMode(editor.textContent, "forth", editor)
+			}	// Highlighter
+			let opts = {tab: ' '.repeat(4)}	// Turn tabs into spaces
+			const jar = new CodeJar(
+				document.querySelector(".editor"),
+				withLineNumbers(hl),
+				opts)
+		</script>
+	</div>	
 </body>
 </html>
