@@ -1,11 +1,15 @@
 // jQuery document
 
-// File pending for upload
-let pendingFile;
+import {CodeJar} from '/www/codejar.min.js';
+import {withLineNumbers} from '/www/linenumbers.min.js';
+
+let ws;				// WebSocket connection
+let jar;			// CodeJar object
+let pendingFile;	// File pending for upload
 
 // WebSocket connection and handling
 function connectWS() {
-	let ws = new WebSocket('ws://' + location.host + '/ws', ['arduino']);
+	ws = new WebSocket('ws://' + location.host + '/ws', ['arduino']);
 
 	// Handle incoming JSON
 	ws.onmessage = function(event) {
@@ -82,7 +86,7 @@ function updateCliOut(addition) {
 	let cliOut = $( '#cliOut' );
 
 	// Split message into lines, filter out empty strings
-	lines = addition.split('\n').filter(s => s);
+	let lines = addition.split('\n').filter(s => s);
 
 	// Show lines separated with <br>
 	$.each (lines, function(i, line) {
@@ -213,27 +217,41 @@ function updateFileList(paths) {
 /////////////////////////// Code editor ////////////////////////////
 
 function initEditor() {
-	// // Update contents
-	// let newCode = String.raw `sample
-	// 	code`;
-	// editor.updateCode(newCode);
-	
-	// // TODO: actions on code update?
-	// // debug only, remove:
-	// editor.onUpdate(updatedCode => { console.log(updatedCode) });
+	// Highlighter
+	const highlight = editor => {
+		CodeMirror.runMode(editor.textContent, "forth", editor);
+	}
+	// Non-jQuery selector for CodeJar compatibility
+	let editor = document.querySelector(".editor");
+	// Turn tabs into spaces
+	let opts = {tab: ' '.repeat(4)};
 
+	// Initialize
+	jar = new CodeJar(
+		editor,
+		withLineNumbers(highlight),
+		opts);
+
+	// TODO: actions on code update?
+	// debug only, remove:
+	jar.onUpdate(updatedCode => { console.log(updatedCode) });
+
+	// Update contents
+	let newCode = 'sample code';
+	jar.updateCode(newCode);
+	
 	// Get code:
-	// let code = editor.getCode();
+	// let code = jar.getCode();
 	// console.log(code);
 }
 
 
 /////////////// Run these handlers when DOM is ready ///////////////
 
+$(initEditor);
 $(connectWS);
 $(killProgram);
 $(sendInput);
 $(initUpload);
 $(downloadFile);
 $(deleteFile);
-$(initEditor);
