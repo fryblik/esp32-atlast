@@ -1,47 +1,49 @@
 // jQuery document
 
-// Initiate WebSocket connection
-let ws = new WebSocket('ws://' + location.host + '/ws', ['arduino']);
-
 // File pending for upload
 let pendingFile;
 
-// Handle incoming JSON
-ws.onmessage = function(event) {
-	// Parse received JSON
-	let obj = JSON.parse(event.data);
+// WebSocket connection and handling
+function connectWS() {
+	let ws = new WebSocket('ws://' + location.host + '/ws', ['arduino']);
 
-	// TODO: DEBUG
-	console.log(obj);
+	// Handle incoming JSON
+	ws.onmessage = function(event) {
+		// Parse received JSON
+		let obj = JSON.parse(event.data);
 
-	// Decide message type
-	if (obj.type == 'cli') {
-		// Print message to CLI
-		updateCliOut(obj.data);
+		// TODO: DEBUG
+		console.log(obj);
 
-	} else if (obj.type == 'fileList') {
-		// Update file select
-		updateFileList(obj.paths);
+		// Decide message type
+		if (obj.type == 'cli') {
+			// Print message to CLI
+			updateCliOut(obj.data);
 
-	} else if (obj.type == 'upload') {
-		// Complete file upload
-		if (obj.status == 'ready') {
-			// ESP is ready for upload. Engage!
-			uploadFile();
-		} else {
-			// ESP refused upload. Clear pending file object.
-			pendingFile = null;
-			alert('Upload aborted: ' + obj.status);
-		}
+		} else if (obj.type == 'fileList') {
+			// Update file select
+			updateFileList(obj.paths);
 
-	} else if (obj.type == 'delete') {
-		// File deletion status
-		if (obj.status == 'ok') {
-			// File deleted, update file list
-			requestFileList();
-		} else {
-			// TODO
-			console.log('Deletion failed!');
+		} else if (obj.type == 'upload') {
+			// Complete file upload
+			if (obj.status == 'ready') {
+				// ESP is ready for upload. Engage!
+				uploadFile();
+			} else {
+				// ESP refused upload. Clear pending file object.
+				pendingFile = null;
+				alert('Upload aborted: ' + obj.status);
+			}
+
+		} else if (obj.type == 'delete') {
+			// File deletion status
+			if (obj.status == 'ok') {
+				// File deleted, update file list
+				requestFileList();
+			} else {
+				// TODO
+				console.log('Deletion failed!');
+			}
 		}
 	}
 }
@@ -211,11 +213,6 @@ function updateFileList(paths) {
 /////////////////////////// Code editor ////////////////////////////
 
 function initEditor() {
-	// let editor = new CodeFlask('#editorArea', {
-	// 	language: 'forth',	// No highlighting available = effectively none
-	// 	lineNumbers: true
-	// });
-	
 	// // Update contents
 	// let newCode = String.raw `sample
 	// 	code`;
@@ -225,13 +222,15 @@ function initEditor() {
 	// // debug only, remove:
 	// editor.onUpdate(updatedCode => { console.log(updatedCode) });
 
-	// // Get code:
+	// Get code:
 	// let code = editor.getCode();
+	// console.log(code);
 }
 
 
 /////////////// Run these handlers when DOM is ready ///////////////
 
+$(connectWS);
 $(killProgram);
 $(sendInput);
 $(initUpload);

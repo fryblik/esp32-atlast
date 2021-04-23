@@ -4,13 +4,20 @@
 	width: 100%;
 }
 
+.codeArea {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 20px;
+}
+
 .cliWindow {
-	display: flex;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    display: flex;
 	flex-direction: column;
 	width: 100%;
 	height: 300px;
-	border: 1px solid #000;
-	background: #EEE;
 	margin-bottom: 4px;
 	font-family:'Courier New';
 }
@@ -20,10 +27,16 @@
 	height: 100%;
 	overflow: auto;
 	white-space: pre;
+    padding: 10px;
 }
 
 #cliIn {
+	background: rgba(255, 255, 255, 0.1);
+    color: inherit;
     border: none;
+    outline: none;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #fileUpDialog {
@@ -38,20 +51,8 @@
 	margin-right: 4px;
 }
 
-.editorArea {
-	position: relative;
-	width: 100%;
-	height: 300px;
-}
-
 .editor {
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-    font-family: 'Source Code Pro', monospace;
-    font-size: 14px;
-    font-weight: 400;
     height: 340px;
-    letter-spacing: normal;
-    line-height: 20px;
     padding: 10px;
-    tab-size: 4;
 }

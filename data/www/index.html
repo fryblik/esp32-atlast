@@ -19,9 +19,10 @@
 	<div class="contentBox">
 
 		<!--ATLAST FORTH shell-->
-		<div class="cliWindow">
-			<div id="cliOut"></div>
-			<input id="cliIn" type="text">
+		<!--Using CodeMirror CSS-->
+		<div class="cliWindow cm-s-dracula CodeMirror">
+			<div id="cliOut" class="codeArea"></div>
+			<input id="cliIn" class="codeArea" type="text">
 		</div>
 
 		<!--ATLAST controls-->
@@ -51,7 +52,7 @@
 		<!--ATLAST FORTH editor (CodeJar)-->
 		<h3>Code editor</h3>
 		<!--Using CodeMirror CSS-->
-		<div class="editor cm-s-dracula CodeMirror"></div>
+		<div class="editor codeArea cm-s-dracula CodeMirror"></div>
 		<!--CodeJar-->
 		<script type="module" id="code">
 			import {CodeJar} from "/www/codejar.min.js"
