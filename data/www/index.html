@@ -26,7 +26,7 @@
 		</div>
 
 		<!--ATLAST controls-->
-		<div class="atlastControls">
+		<div class="controlPanel">
 			<!--Program KILL button-->
 			<button id="killButton">Kill program</button>
 			<!--Restart ATLAST task checkbox-->
@@ -34,19 +34,34 @@
 			<label for="restartTaskBox">Also restart ATLAST</label>
 		</div>
 
-		<!--File controls-->
-		<div class="fileControls">
-			<!--File upload button-->
-			<input id="fileUpDialog" type="file">
-			<button id="fileUpButton">Upload file...</button>
+		<!--File controls with file select-->
+		<div class="controlPanel">
 			<!--File list-->
 			<select name="fileSelect" id="fileSelect">
 				<option disabled selected>No file list received.</option>
 			</select>
 			<!--File download button-->
 			<button id="fileDnButton">Download file</button>
+			<!--File edit button-->
+			<button id="fileEditButton">Edit file</button>
+			<!--File execute button-->
+			<button id="fileExecButton">Execute file</button>
 			<!--File delete button-->
 			<button id="fileDelButton">Delete file</button>
+		</div>
+
+		<!--File controls with file path field-->
+		<div class="controlPanel">
+			<!--Device file path to save under-->
+			<input id="filePathIn" type="text" placeholder="Enter save path: /dir/filename">
+			<!--Upload edited code to device-->
+			<button id="editorUpButton">Upload code from editor</button>
+			<!--File upload button-->
+			<input class="fileDialog" id="fileUpDialog" type="file">
+			<button id="fileUpButton">Upload local file...</button>
+			<!--Load local file to editor-->
+			<input class="fileDialog" id="editLocalDialog" type="file">
+			<button id="editLocalButton">Edit local file...</button>
 		</div>
 
 		<!--ATLAST FORTH editor (CodeJar)-->

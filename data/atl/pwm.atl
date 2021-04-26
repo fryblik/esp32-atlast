@@ -19,7 +19,7 @@ variable pwm-duration
         pwm-duty @ delay-ms
         pwm-pin @ off
         pwm-offduty @ delay-ms
-    0 until                 \ Run PWM loop indefinitely
+    0 until                  \ Run PWM loop indefinitely
 ;
 
 \ Function: [pin] [duty ms] [cycle duration ms] [approx. run duration ms] PWM

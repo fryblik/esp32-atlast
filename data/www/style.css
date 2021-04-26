@@ -1,3 +1,7 @@
+body {
+	font-family: sans-serif;
+}
+
 .contentBox {
     display: flex;
 	flex-direction: column;
@@ -17,20 +21,20 @@
     display: flex;
 	flex-direction: column;
 	width: 100%;
-	height: 300px;
 	margin-bottom: 4px;
-	font-family:'Courier New';
 }
 
 #cliOut {
 	position: relative;
-	height: 100%;
+	height: 300px;
 	overflow: auto;
 	white-space: pre;
     padding: 10px;
+	resize: vertical;
 }
 
 #cliIn {
+    height: 0%;
 	background: rgba(255, 255, 255, 0.1);
     color: inherit;
     border: none;
@@ -39,16 +43,23 @@
     padding-right: 10px;
 }
 
-#fileUpDialog {
+.fileDialog {
 	display: none;
 }
 
-.atlastControls {
-	margin-bottom: 4px;
+.controlPanel {
+	display: flex;
+	flex-direction: row;
+    margin: 0 -1px 4px;
 }
 
-.fileControls {
-	margin-bottom: 4px;
+#fileSelect, #filePathIn {
+	flex-grow: 1;
+    margin: 0 1px;
+}
+
+button {
+    margin: 0 1px;
 }
 
 .editor {

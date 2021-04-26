@@ -21,12 +21,17 @@ char nextPath[32] = "/";
 // File paths not to be deleted/overwritten
 std::vector<std::string> corePaths {
     "/",
+    "/www/codejar.min.js",
+    "/www/dracula.css",
+    "/www/esp32-atlast.js",
+    "/www/favicon.ico",
+    "/www/FileSaver.min.js",
+    "/www/forth.min.js",
     "/www/index.html",
-    "/www/jquery-3.5.1.js",
-    "/www/ws.js",
-    "/www/FileSaver.js",
-    "/www/style.css",
-    "/www/favicon.ico"
+    "/www/jquery-3.5.1.min.js",
+    "/www/linenumbers.min.js",
+    "/www/runmode-standalone.min.js",
+    "/www/style.css"
 };
 
 /**
@@ -361,22 +366,22 @@ void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
 void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     // Check file size
     size_t fileSize = doc["size"];
-    if (fileSize > 128) { // TODO: change size limit
+    if (fileSize > MAX_UPLOAD_SIZE) {
         wsSendAck("upload", "tooLarge", "");
         return;
     }
 
-    // Get file name
-    const char * fileName = (const char*) doc["name"];
-    // Check file name length (SPIFFS limits to 31)
-    if (sizeof(fileName) > 30) {
-        multiPrintf("TRUNCATED FILENAME: \"%s\" was longer than 30 characters", fileName);
+    // Get file path
+    const char * filePath = (const char*) doc["name"];
+    // Check file path length (SPIFFS limits to 31)
+    if (sizeof(filePath) > 31) {
+        multiPrintf("TRUNCATED FILEPATH: \"%s\" was longer than 31 characters", filePath);
     }
-    // Update global path variable (preserve leading slash)
-    strncpy(&nextPath[1], fileName, 30);
+    // Update global path variable
+    strncpy(nextPath, filePath, 31);
 
     // Send approval of download
-    wsSendAck("upload", "ready", &nextPath[1]);
+    wsSendAck("upload", "ready", nextPath);
     multiPrintf("DEBUG: Ready to receive file: %s\n", nextPath);
 }
 
@@ -390,11 +395,11 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     const char * path = (const char*) doc["path"];
     if (removeFile(path)) {
         // File is no more
-        wsSendAck("delete", "ok", &path[1]);
+        wsSendAck("delete", "ok", path);
         multiPrintf("DEBUG: File \"%s\" deleted\n", path);
     } else {
         // Couldn't delete protected file
-        wsSendAck("delete", "protected", &path[1]);
+        wsSendAck("delete", "protected", path);
     }
 }
 

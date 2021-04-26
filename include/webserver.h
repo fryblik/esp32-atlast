@@ -1,6 +1,7 @@
 #include <ArduinoJson.h>
 
 #define STATIC_JSON_SIZE 384
+#define MAX_UPLOAD_SIZE 1024    // TODO: change size limit
 
 // Outgoing CLI text buffer and mutex
 extern std::string wsOutString;
