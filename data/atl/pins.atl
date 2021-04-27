@@ -1,0 +1,69 @@
+\ LilyGO TTGO T-Audio V1.5 GPIO Pin Configuration
+\
+\ Compiled by hand using https://github.com/LilyGO/TTGO-TAudio
+\ and ESP32-WROVER Datasheet v2.4
+
+\ value:      alias:
+  0  constant LOW
+  1  constant HIGH
+  1  constant INPUT
+  2  constant OUTPUT
+  5  constant INPUT_PULLUP
+
+\ GPIO:       alias:
+  0  constant IO0
+  0  constant CLK_24M
+  1  constant TXD
+  2  constant IO2
+  2  constant SD0
+  2  constant MISO
+  3  constant RXD
+  4  constant IO4
+  4  constant SD1
+  5  constant IO5
+  5  constant SCL       \ ST7735
+\ GPIO 6-11 = SPI flash
+  12 constant IO12      \ internally pulled high
+  12 constant SD2
+  13 constant IO13
+  13 constant SD3
+  13 constant CS_13
+  14 constant IO14
+  14 constant CLK
+  14 constant SCK
+  15 constant IO15
+  15 constant CMD
+  15 constant M0S1
+  16 constant IO16
+  16 constant CS_16     \ ST7735
+  17 constant IO17
+  17 constant DC_17     \ ST7735
+  18 constant IO18
+  18 constant SCL_18    \ WM8978
+  19 constant IO19
+  19 constant SDA_19
+  21 constant IO21
+  22 constant IO22
+  22 constant LED       \ LEDs incl. green
+  23 constant IO23
+  23 constant SDA       \ ST7735
+  25 constant IO25
+  25 constant I2S_WS
+  26 constant IO26
+  26 constant I2S_OUT
+  27 constant IO27
+  27 constant I2S_IN
+  32 constant IO32
+  33 constant IO33
+  33 constant I2S_BCK
+\ input only:
+  34 constant IO34
+  34 constant SW3
+  34 constant B3        \ middle button (excl. RST)
+  35 constant IO35
+  35 constant SW5
+  35 constant B4        \ button furthest from RST
+  36 constant S_VP
+  39 constant S_VN
+  39 constant SW4
+  39 constant B2        \ button nearest to RST

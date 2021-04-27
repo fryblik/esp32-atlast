@@ -1,4 +1,53 @@
-\ Requires: run-on-startup.atl
+\ Requires `pins.atl` (should be run automatically on startup).
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ Example 1: Blinking green LED 3 times
+
+\ Helper functions
+: 1s 1000 delay-ms ; \ 1-second delay
+: on high pinw ;     \ switch pin on
+: off low pinw ;     \ switch pin off
+
+\ Function: Turn led on for 1s and off for 1s
+: blink
+    led output pinm \ Configure led pin for output
+    led on
+    1s
+    led off
+    1s
+;
+
+\ Function: Execute BLINK 3 times
+: blink3 blink blink blink ;
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ Example 2: Control LED with the B4 button
+
+\ Function: B4 controls the LED, B3 ends execution
+: B4toLED
+    \ Configure GPIOs:
+    b3 input pinm
+    b4 input pinm
+    led output pinm
+    \ Loop indefinitely:
+    begin
+        b4 pinr \ Push button value onto stack
+        \ Invert value on stack:
+        if
+            low
+        else
+            high
+        then
+        led swap pinw   \ Assign value to LED (value goes second)
+        10 delay-ms     \ We don't need to be too precise
+    b3 pinr low = until \ Loop until button B3 turns low
+;
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ Example 3: Pulse-width modulation
 
 \ PWM variables
 variable pwm-duty
@@ -7,9 +56,8 @@ variable pwm-cycle
 variable pwm-pin
 variable pwm-duration
 
-
 \ Function: [pin] [duty ms] [cycle duration ms] PWM-INF
-: PWM-INF
+: PWM-INFINITE
     pwm-cycle ! pwm-duty ! pwm-pin !    \ Save values from stack
     pwm-cycle @ pwm-duty @ - \ Subtract pwm-duty value from pwm-cycle value
     pwm-offduty !            \  and save the result to pwm-offduty

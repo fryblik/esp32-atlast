@@ -3189,7 +3189,6 @@ static void exword(wp)
 	}
 #endif /* TRACE */
 	(*curword->wcode)();	      /* Execute the next word */
-    // ESP: TODO yield to TCP task
     }
     curword = NULL;
 }

@@ -8,6 +8,8 @@
 
 /**
  * Set pin mode
+ * 
+ * [pin] [mode] PINM
  */
 prim P_pinm() {
     // Check for stack underflow (need 2 arguments)
@@ -20,8 +22,10 @@ prim P_pinm() {
 
 /**
  * Write into pin
+ * 
+ * [pin] [value] PINW
  */
-prim P_digw() {
+prim P_pinw() {
     Sl(2);
     digitalWrite(S1, S0);
     Pop2;
@@ -29,8 +33,10 @@ prim P_digw() {
 
 /**
  * Read from pin
+ * 
+ * [pin] PINR
  */
-prim P_digr() {
+prim P_pinr() {
     Sl(1);
     stackitem s = digitalRead(S0);
     S0 = s;
@@ -39,6 +45,7 @@ prim P_digr() {
 /**
  * Delay in ms
  * 
+ * [interval] DELAY_MS
  * Shorter periods would require busy wait.
  */
 prim P_delay_ms() {
@@ -53,8 +60,8 @@ prim P_delay_ms() {
 // Primitive definition table
 static struct primfcn espPrims[] = {
     {"0PINM",       P_pinm},
-    {"0DIGW",       P_digw},
-    {"0DIGR",       P_digr},
+    {"0PINW",       P_pinw},
+    {"0PINR",       P_pinr},
     {"0DELAY-MS",   P_delay_ms},
     {NULL,          (codeptr) 0}
 };
@@ -68,7 +75,3 @@ void atlastAddPrims() {
     // Add primitives to ATLAST dictionary
     atl_primdef(espPrims);
 }
-
-
-// TODO: use atl_primdef()
-// TODO: remove ESP32_PRIM def from atlast.c & atlast.h & maybe elsewhere?

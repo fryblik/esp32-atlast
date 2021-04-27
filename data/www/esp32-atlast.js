@@ -15,7 +15,7 @@ function connectWS() {
 		// Parse received JSON
 		let obj = JSON.parse(event.data);
 
-		// TODO: DEBUG
+		// TODO: DEBUG, remove
 		console.log(obj);
 
 		// Decide message type
@@ -62,7 +62,6 @@ function sendInput() {
 			let msg = cliIn.val();
 
 			// Empty input crashes ATLAST
-			// TODO: send " " on empty message?
 			if (!msg) {
 				return;
 			}

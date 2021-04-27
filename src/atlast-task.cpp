@@ -157,10 +157,10 @@ void atlastInit() {
     // Create ATLAST interpreter task
     atlastCreateTask();
 
-    // Run ATLAST source file "/atl/run-on-startup.atl"
+    // Run ATLAST source file "/atl/pins.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
     rd.commands.push("file startupfile");
-    rd.commands.push("\"/atl/run-on-startup.atl\" 1 startupfile fopen");
+    rd.commands.push("\"/atl/pins.atl\" 1 startupfile fopen");
     rd.commands.push("startupfile fload");
     rd.commands.push("startupfile fclose");
     rd.startFlag = true;
