@@ -1,4 +1,5 @@
 #include "atlast-1.2-esp32/atlast.h"
+#include "atlast-prims.h"
 #include "atlast-task.h"
 #include "multi-io.h"
 
@@ -147,11 +148,16 @@ void atlastCreateTask() {
  * Initiate Atlast and create interpreter task.
  */
 void atlastInit() {
+    // Need to explicitly initialize ATLAST before extending dictionary
+    atl_init();
+
+    // Extend ATLAST dictionary with custom word definitions
+    atlastAddPrims();
+
     // Create ATLAST interpreter task
     atlastCreateTask();
 
     // Run ATLAST source file "/atl/run-on-startup.atl"
-    // atl_init() is called automatically with first command
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
     rd.commands.push("file startupfile");
     rd.commands.push("\"/atl/run-on-startup.atl\" 1 startupfile fopen");

@@ -83,11 +83,9 @@
 
 #include "atldef.h"
 
-// ESP: "Override" printf() with custom formatted print 
-#ifdef ESP32_PRIM
+// ESP: Replace printf() with custom formatted print
 #include "multi-io.h"
 #define	printf multiPrintf
-#endif /* ESP32_PRIM */
 
 #ifdef MATH
 #include <math.h>
@@ -2726,38 +2724,6 @@ prim P_fwdresolve()		      /* Emit forward jump offset */
 
 #endif /* COMPILERW */
 
-// ESP: ESP32 words (blippy)
-// TODO: use atl_primdef()?
-#ifdef ESP32_PRIM
-
-prim P_pinm() { // set pin mode
-  Sl(2);
-  pinMode(S1, S0);
-  Pop2;
-}
-
-prim P_digw() { // write into pin
-  Sl(2);
-  digitalWrite(S1, S0);
-  Pop2;
-}
-
-prim P_digr() { // read from pin
-  Sl(1);
-  stackitem s = digitalRead(S0);
-  S0 = s;
-}
-
-prim P_delay_ms() { // delay in ms (shorter periods would require busy wait)
-  Sl(1);
-  if ((long) S0 >= 0) {    // prevent extreme task delay on negative argument
-    delay(S0);
-  }
-  Pop;
-}
-
-#endif /* ESP32_PRIM */
-
 /*  Table of primitive words  */
 
 static struct primfcn primt[] = {
@@ -3012,14 +2978,6 @@ static struct primfcn primt[] = {
 #ifdef EVALUATE
     {"0EVALUATE", P_evaluate},
 #endif /* EVALUATE */
-
-// ESP: blippy
-#ifdef ESP32_PRIM
-    {"0PINM", P_pinm},
-    {"0DIGW", P_digw},
-    {"0DIGR", P_digr},
-    {"0DELAY-MS", P_delay_ms},
-#endif /* ESP32_PRIM */
 
     {NULL, (codeptr) 0}
 };

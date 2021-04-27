@@ -68,4 +68,3 @@ extern void atl_memstat();
 
 /* Config */
 #define EXPORT
-#define ESP32_PRIM
