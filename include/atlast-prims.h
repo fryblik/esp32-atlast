@@ -5,7 +5,7 @@ extern "C" {
 /**
  * ATLAST add primitives
  * 
- * Extend ATLAST with custom word definitions.
+ * Extend ATLAST with custom primitive word definitions.
  */
 void atlastAddPrims();
 

@@ -41,14 +41,9 @@ int multiPrintf(char* format, ...){
  * Handle input string from serial or websocket (evaluate ATLAST).
  * Maximum input length is 256.
  */
-void incomingText(const char* inputData, size_t len) {
-	// Copy received text into a null-terminated string
-	char terminated_string[len];
-	strncpy(terminated_string, inputData, len);
-	terminated_string[len] = '\0';
-
+void incomingText(char* inputData) {
 	// Pass command to ATLAST interpreter
-	atlastCommand(terminated_string);
+	atlastCommand(inputData);
 }
 
 /**
