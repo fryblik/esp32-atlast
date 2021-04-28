@@ -14,11 +14,6 @@ extern SemaphoreHandle_t wsOutMutex;
 void parseReceived(void * arg, uint8_t * data, size_t len);
 
 /**
- * Connect to WLAN
- */
-void connectWLAN(const char * ssid, const char * password);
-
-/**
  * Setup web server
  * 
  * Setup websocket, start the server, configure hosting files in SPIFFS.

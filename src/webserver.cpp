@@ -3,7 +3,7 @@
 #include <SPIFFS.h>
 
 #include "atlast-task.h"
-#include "multi-io.h"
+#include "io.h"
 #include "webserver.h"
 
 
@@ -149,24 +149,6 @@ void parseReceived(void * arg, uint8_t * data, size_t len) {
             incomingData(data, len, info->len);
         }
     }
-}
-
-/**
- * Connect to WLAN
- */
-void connectWLAN(const char* ssid, const char* password) {
-    // Connect to access point
-    Serial.println("Connecting to WLAN");
-    WiFi.begin(ssid, password);
-    while ( WiFi.status() != WL_CONNECTED ) {
-        delay(500);
-        Serial.print(".");
-    }
-
-    // Print IP address
-    Serial.println("Connected!");
-    Serial.print("My IP address: ");
-    Serial.println(WiFi.localIP());
 }
 
 /**

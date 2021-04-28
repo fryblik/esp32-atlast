@@ -84,7 +84,7 @@
 #include "atldef.h"
 
 // ESP: Replace printf() with custom formatted print
-#include "multi-io.h"
+#include "io.h"
 #define	printf multiPrintf
 
 #ifdef MATH
