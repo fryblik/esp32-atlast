@@ -2,7 +2,6 @@
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
-#include <WebSocketsServer.h>
 
 #include "atlast-1.2-esp32/atlast.h"
 #include "atlast-task.h"
@@ -108,7 +107,7 @@ void loop() {
     if (Serial.available()) {
         if(readSerial()) {
             // Once a whole line is read, handle received data
-            incomingText(inputString, strlen(inputString));
+            incomingText(inputString);
         }
     }
 

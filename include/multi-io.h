@@ -24,7 +24,7 @@ extern "C" {
  * Handle input string from serial or websocket (evaluate ATLAST).
  * Maximum input length is 256.
  */
-void incomingText(const char* inputData, size_t len);
+void incomingText(char* inputData);
 
 /**
  * Print file list
