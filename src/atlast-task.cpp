@@ -117,8 +117,6 @@ void atlastCommand(char* command) {
 
     // Print incoming command
 	multiPrintf("> %s\n", command);
-    // TODO: remove this
-    multiPrintf("DEBUG: Queue size: %d, start: %d, kill: %d, running: %d\n", rd.commands.size(), rd.startFlag, rd.killFlag, rd.isRunning);
     // Append command to Run Data and start execution
     rd.commands.push(command);
     if (!rd.isRunning) {
