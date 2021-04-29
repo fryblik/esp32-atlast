@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <string>
 #include <SPIFFS.h>
+#include <Wire.h>
 
 #include "atlast-1.2-esp32/atlast.h"
 #include "atlast-task.h"
@@ -71,6 +72,34 @@ bool serialReadLine(char * buf, size_t limit) {
         Serial.read();
     }
     return false;
+}
+
+/**
+ * Scan I2C
+ * 
+ * Scan and print addresses of responding I2C devices.
+ * Expects 7-bit address space.
+ */
+void scanI2C() {
+    bool found = false;
+    multiPrintf("HEX: DEC:\n");
+
+    // Iterate through valid slave addreses
+    for (uint8_t address = 8; address < 120; address++) {
+        // Probe address and check return state
+        Wire.beginTransmission(address);
+        if (Wire.endTransmission() == I2C_ERROR_OK) {
+            // Device found, print address in HEX and DEC
+            multiPrintf("0x%02x  %3u\n", address, address);
+            found = true;
+        }
+    }
+
+    if (found) {
+        multiPrintf("I2C scan completed.\n");
+    } else {
+        multiPrintf("No I2C device found.\n");
+    }
 }
 
 /**

@@ -1,4 +1,5 @@
-#ifdef __cplusplus  // atlast.c only needs multiPrintf()
+#ifdef __cplusplus  // C files only use multiPrintf() and scanI2C()
+
 #include <ArduinoJson.h>
 #include <stdint.h>
 
@@ -16,7 +17,7 @@ bool serialReadLine(char * buf, size_t limit);
 
 
 extern "C" {
-#endif
+#endif // __cplusplus
 
 /**
  * Multi printf
@@ -24,6 +25,14 @@ extern "C" {
  * Print formatted data to multiple outputs.
  */
 int multiPrintf(char * format, ...);
+
+/**
+ * Scan I2C
+ * 
+ * Scan and print addresses of responding I2C devices.
+ * Expects 7-bit address space.
+ */
+void scanI2C();
 
 #ifdef __cplusplus
 }
@@ -98,4 +107,4 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
  */
 void incomingJson(const char* inputData);
 
-#endif
+#endif // __cplusplus

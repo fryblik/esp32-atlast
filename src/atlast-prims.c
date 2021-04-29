@@ -4,6 +4,7 @@
 
 #include "atlast-1.2-esp32/atldef.h"
 #include "atlast-prims.h"
+#include "io.h"
 
 // NOTE: Do not forget to add definitions to the table in atlastAddPrims()!
 
@@ -125,6 +126,16 @@ prim P_fsfree() {
     Push = freeBytes;
 }
 
+/**
+ * I2C scanner
+ * 
+ * SCANI2C
+ * Doesn't modify the stack, only prints the addresses.
+ */
+prim P_scani2c() {
+    scanI2C();
+}
+
 // Primitive definition table
 static struct primfcn espPrims[] = {
     {"0PINM",       P_pinm},
@@ -136,6 +147,7 @@ static struct primfcn espPrims[] = {
     {"0FSSIZE",     P_fssize},
     {"0FSUSED",     P_fsused},
     {"0FSFREE",     P_fsfree},
+    {"0SCANI2C",    P_scani2c},
     {NULL,          (codeptr) 0}
 };
 

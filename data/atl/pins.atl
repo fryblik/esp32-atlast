@@ -21,7 +21,7 @@
   4  constant IO4
   4  constant SD1
   5  constant IO5
-  5  constant SCL       \ ST7735
+  5  constant SCL_5     \ ST7735
 \ GPIO 6-11 = SPI flash
   12 constant IO12      \ internally pulled high
   12 constant SD2
@@ -41,21 +41,21 @@
   18 constant IO18
   18 constant SCL_18    \ WM8978
   19 constant IO19
-  19 constant SDA_19
+  19 constant SDA_19    \ WM8978
   21 constant IO21
   22 constant IO22
   22 constant LED       \ LEDs incl. green
   23 constant IO23
-  23 constant SDA       \ ST7735
+  23 constant SDA_23    \ ST7735
   25 constant IO25
-  25 constant I2S_WS
+  25 constant I2S_WS    \ WM8978
   26 constant IO26
-  26 constant I2S_OUT
+  26 constant I2S_OUT   \ WM8978
   27 constant IO27
-  27 constant I2S_IN
+  27 constant I2S_IN    \ WM8978
   32 constant IO32
   33 constant IO33
-  33 constant I2S_BCK
+  33 constant I2S_BCK   \ WM8978
 \ input only:
   34 constant IO34
   34 constant SW3
