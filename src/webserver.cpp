@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
@@ -16,25 +17,6 @@ AsyncWebSocketClient* currentClient;
 std::string wsOutString;
 SemaphoreHandle_t wsOutMutex = xSemaphoreCreateMutex();
 
-// File upload: file path, filem and size of data received so far
-char uploadPath[32] = "/";
-File uploadFileHandle;
-size_t uploadBytesWritten = 0;
-// File paths not to be deleted/overwritten
-std::vector<std::string> corePaths {
-    "/",
-    "/www/codejar.min.js",
-    "/www/dracula.css",
-    "/www/esp32-atlast.js",
-    "/www/favicon.ico",
-    "/www/FileSaver.min.js",
-    "/www/forth.min.js",
-    "/www/index.html",
-    "/www/jquery-3.5.1.min.js",
-    "/www/linenumbers.min.js",
-    "/www/runmode-standalone.min.js",
-    "/www/style.css"
-};
 
 /**
  * On websocket event
@@ -94,60 +76,40 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
  * Parse received
  * 
  * Parse data received through websocket.
- * Ref.: https://github.com/me-no-dev/ESPAsyncWebServer#async-websocket-event
- * TODO: Clean up this mess.
  */
 void parseReceived(void * arg, uint8_t * data, size_t len) {
     // Parse arguments
-    // WARNING: len = length of current frame,
-    //          info->len = total length of all frames,
-    //          info->final = always 1,
-    //          info->num = always 0,
-    //          info->offset = this one actually works as I'd expect.
-    //          I don't like this library and it doesn't like me either.
-    AwsFrameInfo * info = (AwsFrameInfo*)arg;
+    // NOTE:
+    // AwsFrameInfo is confusing. Study the silly structure carefully.
+    // Different uses of info->opcode and info->message_opcode:
+    // https://github.com/me-no-dev/ESPAsyncWebServer#async-websocket-event
+    AwsFrameInfo * info = (AwsFrameInfo*) arg;
 
-    if(info->final && info->index == 0 && info->len == len) {
-        // The whole message is in a single frame
+    // Message is binary, either single- or multi-frame
+    if (info->opcode == WS_BINARY ||
+        (info->opcode == WS_CONTINUATION && info->message_opcode == WS_BINARY)) {
 
-        if (info->opcode == WS_TEXT) {
-            // Single-frame text (JSON)
+        // Handle received data
+        incomingData(arg, data, len);
+        return;
+    }
 
-            // Verify input length (to protect statically allocated JSON deserializer)
-            if (info->len > 250) {
-                multiPrintf("DISCARDED INPUT: Too long (%u > 250).\n", (size_t) info->len);
-                return;
-            }
-            // Handle received JSON
-            incomingJson((char*) data);
-
-        } else if (info->opcode == WS_BINARY) {
-            // Single-frame binary data
-
-            // Reset counter to indicate first frame
-            uploadBytesWritten = 0;
-            // Handle received data
-            incomingData(data, len, info->len);
+    // Message is text (JSON), in a single frame, and this is all its data
+    if (info->opcode == WS_TEXT && info->final && info->index == 0 && info->len == len) {
+        // Verify input length (to protect statically allocated JSON deserializer)
+        if (len > 250) {
+            multiPrintf("DISCARDED INPUT: Too long (%u > 250).\n", len);
+            return;
         }
-    } else {
-        // Message is comprised of multiple frames/packets
+        // Handle received JSON
+        incomingJson((char*) data);
+        return;
 
-        if (info->opcode == WS_TEXT) {
-            // Multi-frame text (JSON)
+    } else if (info->message_opcode == WS_TEXT) {
+        // Fragmented text (JSON)
 
-            // TODO: Handle multi-frame text data. So far unnecessary.
-            multiPrintf("DISCARDED INPUT: Multi-frame text data received.\n");
-
-        } else if (info->opcode == WS_BINARY) {
-            // Multi-frame binary data
-
-            // Indicate first frame by resetting counter
-            if (info->index == 0) {
-                uploadBytesWritten = 0;
-            }
-            // Handle received data
-            incomingData(data, len, info->len);
-        }
+        // TODO: Handle fragmented text data? So far not necessary.
+        multiPrintf("DISCARDED INPUT: Multi-frame text data received.\n");
     }
 }
 
@@ -297,180 +259,5 @@ void wsSendAck(const char * type, const char * status, const char * name) {
 
         // Send through websocket
         currentClient->text(output);
-    }
-}
-
-/**
- * Remove file
- * 
- * Remove file in path location.
- * Return true if file is removed or didn't exist.
- * Return false if file is protected.
- * 
- * Might complain repeatedly on multi-frame upload to a protected location.
- * Such is life.
- */
-bool removeFile(const char * path) {
-    // Do not remove protected file paths
-    if (std::find(corePaths.begin(), corePaths.end(), path) != corePaths.end()) {
-        multiPrintf("ILLEGAL: Cannot modify core file \"%s\"", path);
-        return false;
-    }
-
-    // Remove existing file
-    if (SPIFFS.exists(path)) {
-        SPIFFS.remove(path);
-    }
-    return true;
-}
-
-/**
- * Incoming data
- * 
- * Save currentLen of data frames from websocket in SPIFFS.
- * Expects total length of all frames from totalLen.
- * Incoming file is stored under 'uploadPath'.
- */
-void incomingData(uint8_t * inputData, size_t currentLen, size_t totalLen) {
-    // If this is the first frame (nothing written so far)
-    if (uploadBytesWritten == 0) {
-        // For safety, try closing potentially open file
-        uploadFileHandle.close();
-
-        // Remove old file if exists, return if it's protected from modifying
-        if(!removeFile(uploadPath)) {
-            // Invalidate uploadPath
-            uploadPath[1] = '\0';
-            return;
-        }
-
-        // Open file for writing
-        uploadFileHandle = SPIFFS.open(uploadPath, FILE_WRITE);
-        if (!uploadFileHandle) { 
-            multiPrintf("Failed to open file \"%s\" for writing.\n", uploadPath);
-            return; 
-        }
-    }
-
-    // Write data to open file and count written bytes
-	uploadBytesWritten += uploadFileHandle.write(inputData, currentLen);
-
-    // If this was the last frame (all bytes written), close file
-    if (uploadBytesWritten == totalLen) {
-        uploadFileHandle.close();
-        // TODO: Send JSON acknowledge?
-        multiPrintf("Upload successful: \"%s\" (%d bytes).\n", uploadPath, totalLen);
-
-        // Reset counter
-        uploadBytesWritten = 0;
-    }
-}
-
-/**
- * Incoming JSON CLI
- * 
- * Handle incoming CLI input.
- */
-void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    std::string data = doc["data"];
-    incomingText(&data[0]);
-}
-
-/**
- * Incoming JSON file list
- * 
- * Handle incoming file list request.
- */
-void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    multiPrintf("DEBUG: Requested file list\n");
-    wsSendFileList();
-}
-
-/**
- * Incoming JSON upload
- * 
- * Handle incoming file upload request.
- */
-void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    // Compare file size with available space in SPIFFS
-    size_t fileSize = doc["size"];
-    // TODO: fix free space calculation
-    size_t freeStorage = SPIFFS.totalBytes() - SPIFFS.usedBytes();
-    if (fileSize > freeStorage) {
-        wsSendAck("upload", "tooLarge", "");
-        return;
-    }
-
-    // Get file path
-    const char * filePath = (const char*) doc["name"];
-    // Check file path length (SPIFFS limits to 31)
-    if (sizeof(filePath) > 31) {
-        multiPrintf("TRUNCATED FILEPATH: \"%s\" was longer than 31 characters", filePath);
-    }
-    // Update global path variable
-    strncpy(uploadPath, filePath, 31);
-
-    // Send approval of download
-    wsSendAck("upload", "ready", uploadPath);
-    multiPrintf("DEBUG: Ready to receive file: %s\n", uploadPath);
-}
-
-/**
- * Incoming JSON delete
- * 
- * Handle incoming file deletion request.
- */
-void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    // Get file path
-    const char * path = (const char*) doc["path"];
-    if (removeFile(path)) {
-        // File is no more
-        wsSendAck("delete", "ok", path);
-        multiPrintf("DEBUG: File \"%s\" deleted\n", path);
-    } else {
-        // Couldn't delete protected file
-        wsSendAck("delete", "protected", path);
-    }
-}
-
-/**
- * Incoming JSON kill
- * 
- * Handle incoming ATLAST kill request.
- */
-void incomingJsonKill(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    // Get ATLAST task restart parameter
-    bool restartTask = doc["restartTask"];
-    multiPrintf("DEBUG: restartTask %d\n", restartTask);
-
-    atlastKill(restartTask);
-}
-
-/**
- * Incoming JSON
- * 
- * Parse and handle incoming JSON document.
- * Maximum input length is 256.
- */
-void incomingJson(const char* inputData) {
-    // Deserialize received JSON document
-    StaticJsonDocument<STATIC_JSON_SIZE> doc;
-    DeserializationError err = deserializeJson(doc, inputData);
-    if (err) {
-        multiPrintf("JSON deserialization error: %s\n", err);
-        return;
-    }
-
-    // Decide message type
-    if (doc["type"] == "cli") {
-        incomingJsonCli(doc);
-    } else if (doc["type"] == "fileList") {
-        incomingJsonFileList(doc);
-    } else if (doc["type"] == "upload") {
-        incomingJsonUpload(doc);
-    } else if (doc["type"] == "delete") {
-        incomingJsonDelete(doc);
-    } else if (doc["type"] == "kill") {
-        incomingJsonKill(doc);
     }
 }

@@ -1,7 +1,3 @@
-#include <ArduinoJson.h>
-
-#define STATIC_JSON_SIZE 384
-
 // Outgoing CLI text buffer and mutex
 extern std::string wsOutString;
 extern SemaphoreHandle_t wsOutMutex;
@@ -48,59 +44,3 @@ void wsSendFileList();
  * Send (negative-) acknowledge JSON for various requests.
  */
 void wsSendAck(const char * type, const char * status, const char * name);
-
-/**
- * Remove file
- * 
- * Remove file in path location.
- * Return true if file is removed or didn't exist.
- * Return false if file is protected.
- * 
- * Might complain repeatedly on multi-frame upload to a protected location.
- * Such is life.
- */
-bool removeFile(const char * path);
-
-/**
- * Incoming data
- * 
- * Save currentLen of data frames from websocket in SPIFFS.
- * Expects total length of all frames from totalLen.
- * Incoming file is stored under 'uploadPath'.
- */
-void incomingData(uint8_t * inputData, size_t currentLen, size_t totalLen);
-
-/**
- * Incoming JSON CLI
- * 
- * Handle incoming CLI input.
- */
-void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
-
-/**
- * Incoming JSON file list
- * 
- * Handle incoming file list request.
- */
-void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
-
-/**
- * Incoming JSON upload
- * 
- * Handle incoming file upload request.
- */
-void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
-
-/**
- * Incoming JSON delete
- * 
- * Handle incoming file deletion request.
- */
-void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
-
-/**
- * Incoming JSON
- * 
- * Parse and handle incoming JSON document.
- */
-void incomingJson(const char* inputData);

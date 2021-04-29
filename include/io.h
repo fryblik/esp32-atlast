@@ -1,4 +1,8 @@
+#ifdef __cplusplus  // atlast.c only needs multiPrintf()
+#include <ArduinoJson.h>
 #include <stdint.h>
+
+#define STATIC_JSON_SIZE 384
 
 /**
  * Serial read line
@@ -10,18 +14,26 @@
  */
 bool serialReadLine(char * buf, size_t limit);
 
+
+extern "C" {
+#endif
+
 /**
  * Multi printf
  * 
  * Print formatted data to multiple outputs.
  */
-#ifdef __cplusplus
-extern "C" {
-#endif
-    int multiPrintf(char * format, ...);
+int multiPrintf(char * format, ...);
+
 #ifdef __cplusplus
 }
-#endif
+
+/**
+ * Print file list
+ * 
+ * List all files in CLI.
+ */
+void printFileList();
 
 /**
  * Incoming text
@@ -32,8 +44,58 @@ extern "C" {
 void incomingText(char * inputData);
 
 /**
- * Print file list
+ * Remove file
  * 
- * List all files in CLI.
+ * Remove file in path location.
+ * Return true if file is removed or didn't exist.
+ * Return false if file is protected.
+ * 
+ * Might complain repeatedly on multi-frame upload to a protected location.
+ * Such is life.
  */
-void printFileList();
+bool removeFile(const char * path);
+
+/**
+ * Incoming data
+ * 
+ * Save received part of file from websocket in SPIFFS.
+ * Incoming file is stored under 'uploadPath'.
+ */
+void incomingData(void * arg, uint8_t * data, size_t dataLen);
+
+/**
+ * Incoming JSON CLI
+ * 
+ * Handle incoming CLI input.
+ */
+void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON file list
+ * 
+ * Handle incoming file list request.
+ */
+void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON upload
+ * 
+ * Handle incoming file upload request.
+ */
+void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON delete
+ * 
+ * Handle incoming file deletion request.
+ */
+void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc);
+
+/**
+ * Incoming JSON
+ * 
+ * Parse and handle incoming JSON document.
+ */
+void incomingJson(const char* inputData);
+
+#endif
