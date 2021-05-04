@@ -278,7 +278,7 @@ void incomingJsonCli(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
  * Handle incoming file list request.
  */
 void incomingJsonFileList(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
-    multiPrintf("DEBUG: Requested file list\n");
+    //multiPrintf("DEBUG: Requested file list\n");
     wsSendFileList();
 }
 
@@ -308,7 +308,7 @@ void incomingJsonUpload(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
 
     // Send approval of download
     wsSendAck("upload", "ready", uploadPath);
-    multiPrintf("DEBUG: Ready to receive file: %s\n", uploadPath);
+    //multiPrintf("DEBUG: Ready to receive file: %s\n", uploadPath);
 }
 
 /**
@@ -322,7 +322,7 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     if (removeFile(path)) {
         // File is no more
         wsSendAck("delete", "ok", path);
-        multiPrintf("DEBUG: File \"%s\" deleted\n", path);
+        //multiPrintf("DEBUG: File \"%s\" deleted\n", path);
     } else {
         // Couldn't delete protected file
         wsSendAck("delete", "protected", path);
@@ -337,7 +337,7 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
 void incomingJsonKill(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     // Get ATLAST task restart parameter
     bool restartTask = doc["restartTask"];
-    multiPrintf("DEBUG: restartTask %d\n", restartTask);
+    //multiPrintf("DEBUG: restartTask %d\n", restartTask);
 
     atlastKill(restartTask);
 }

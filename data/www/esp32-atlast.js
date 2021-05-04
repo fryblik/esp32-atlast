@@ -19,7 +19,7 @@ function connectWS() {
 		// Parse received JSON
 		let obj = JSON.parse(event.data);
 
-		// TODO: DEBUG, remove
+		// Debug
 		console.log(obj);
 
 		// Decide message type
@@ -128,10 +128,6 @@ function initEditor() {
 		editor,
 		withLineNumbers(highlight),
 		opts);
-
-	// TODO: actions on code update?
-	// debug only, remove:
-	jar.onUpdate(updatedCode => { console.log(updatedCode) });
 
 	// Update contents
 	let newCode = 'sample code';

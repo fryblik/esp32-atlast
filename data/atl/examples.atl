@@ -5,7 +5,7 @@
 \ Example 1: Blinking green LED 3 times
 
 \ Helper functions
-: 1s 1000 delay-ms ; \ 1-second delay
+: 1s 1000 delay_ms ; \ 1-second delay
 : on high pinw ;     \ switch pin on
 : off low pinw ;     \ switch pin off
 
@@ -41,7 +41,7 @@
             high
         then
         led swap pinw   \ Assign value to LED (value goes second)
-        10 delay-ms     \ We don't need to be too precise
+        10 delay_ms     \ We don't need to be too precise
     b3 pinr low = until \ Loop until button B3 turns low
 ;
 
@@ -64,9 +64,9 @@ variable pwm-duration
     pwm-pin @ output pinm    \ Get pin number and set its mode to output
     begin
         pwm-pin @ on
-        pwm-duty @ delay-ms
+        pwm-duty @ delay_ms
         pwm-pin @ off
-        pwm-offduty @ delay-ms
+        pwm-offduty @ delay_ms
     0 until                  \ Run PWM loop indefinitely
 ;
 
@@ -78,9 +78,46 @@ variable pwm-duration
     pwm-pin @ output pinm       \ Get pin number and set its mode to output
     pwm-duration @ 0 do         \ Put duration value on stack and start loop
         pwm-pin @ on
-        pwm-duty @ delay-ms
+        pwm-duty @ delay_ms
         pwm-pin @ off
-        pwm-offduty @ delay-ms
+        pwm-offduty @ delay_ms
         pwm-cycle @             \ Put loop step on stack
     +loop                       \ Run PWM loop
+;
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ Example 4: Reading I2C accelerometer data
+
+\ Function: ACCEL-INFINITE
+: ACCEL-INFINITE
+\ Set accelerometer scale:
+    \ Range +-16g: 0x18 (24 decimal)
+    \ Register address for accel config: 0x1C (28 decimal)
+    \ Byte count: 2
+    \ MPU9250 address: 0x68 (104 decimal)
+    \ Write to I2C & drop return value
+    24 28 2 104 i2cwrite drop
+    begin
+
+    \ Select accelerometer data register:
+        \ Register address (ACCEL_XOUT_H): 0x3B (59 decimal)
+        \ Byte count: 1
+        \ MPU9250 address: 0x68 (104 decimal)
+        \ Write to I2C & drop return value
+        59 1 104 i2cwrite drop
+
+    \ Request and read 3×16-bit g-force values (6 bytes):
+        \ Requested byte count: 6
+        \ MPU9250 address: 0x68 (104 decimal)
+        \ Read from I2C
+        6 104 i2cread
+
+    \ Convert and print received data on stack:
+        \ Range +-16g: 16
+        16 parseaccel
+
+    \ Wait for one second:
+        1000 delay_ms
+    0 until \ Run loop indefinitely
 ;

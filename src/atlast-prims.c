@@ -226,7 +226,7 @@ static struct primfcn espPrims[] = {
     {"0PINM",       P_pinm},
     {"0PINW",       P_pinw},
     {"0PINR",       P_pinr},
-    {"0DELAY-MS",   P_delay_ms},
+    {"0DELAY_MS",   P_delay_ms},
     {"0UPTIME_MS",  P_uptime_ms},
     {"0UPTIME_S",   P_uptime_s},
     {"0FSSIZE",     P_fssize},
