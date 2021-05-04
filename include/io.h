@@ -1,19 +1,9 @@
-#ifdef __cplusplus  // C files only use multiPrintf() and scanI2C()
+#ifdef __cplusplus  // Certain functions are included by C files
 
 #include <ArduinoJson.h>
 #include <stdint.h>
 
 #define STATIC_JSON_SIZE 384
-
-/**
- * Serial read line
- * 
- * Store chars from serial input into provided buffer.
- * Loops until newline is read or when size limit is met.
- * Returns true if a complete line has been read, false otherwise.
- * WARNING: Discards the rest of incoming UART buffer!
- */
-bool serialReadLine(char * buf, size_t limit);
 
 
 extern "C" {
@@ -34,8 +24,33 @@ int multiPrintf(char * format, ...);
  */
 void scanI2C();
 
+/**
+ * Write I2C
+ * 
+ * Write data to I2C slave at specified 7-bit address.
+ */
+uint8_t writeI2C(uint8_t address, uint8_t * data, size_t len);
+
+/**
+ * Read I2C
+ * 
+ * Request and read data from I2C slave at specified 7-bit address.
+ */
+void readI2C(uint8_t address, uint8_t * data, size_t len);
+
 #ifdef __cplusplus
 }
+
+
+/**
+ * Serial read line
+ * 
+ * Store chars from serial input into provided buffer.
+ * Loops until newline is read or when size limit is met.
+ * Returns true if a complete line has been read, false otherwise.
+ * WARNING: Discards the rest of incoming UART buffer!
+ */
+bool serialReadLine(char * buf, size_t limit);
 
 /**
  * Print file list

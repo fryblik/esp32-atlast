@@ -32,6 +32,92 @@ std::vector<std::string> corePaths {
 
 
 /**
+ * Scan I2C
+ * 
+ * Scan and print addresses of responding I2C devices.
+ * Expects 7-bit address space.
+ */
+void scanI2C() {
+    bool found = false;
+    multiPrintf("HEX: DEC:\n");
+
+    // Iterate through valid slave addreses
+    for (uint8_t address = 8; address < 120; address++) {
+        // Probe address and check return state
+        Wire.beginTransmission(address);
+        if (Wire.endTransmission() == I2C_ERROR_OK) {
+            // Device found, print address in HEX and DEC
+            multiPrintf("0x%02x  %3u\n", address, address);
+            found = true;
+        }
+    }
+
+    if (found) {
+        multiPrintf("I2C scan completed.\n");
+    } else {
+        multiPrintf("No I2C device found.\n");
+    }
+}
+
+/**
+ * Write I2C
+ * 
+ * Write data to I2C slave at specified 7-bit address.
+ */
+uint8_t writeI2C(uint8_t address, uint8_t * data, size_t len) {
+    Wire.beginTransmission(address);
+    Wire.write(data, len);
+    return Wire.endTransmission();
+}
+
+/**
+ * Read I2C
+ * 
+ * Request and read data from I2C slave at specified 7-bit address.
+ */
+void readI2C(uint8_t address, uint8_t * data, size_t len) {
+    // Request `len` amount of data
+    Wire.requestFrom(address, len);
+
+    size_t i = 0;
+    uint8_t dataByte;
+
+    // Read data while available, store the specified amount
+    while (Wire.available()) {
+        dataByte = Wire.read();
+        if (i < len) {
+            data[i] = dataByte;
+            i++;
+        }
+    }
+}
+
+/**
+ * Multi printf
+ * 
+ * Print formatted data to multiple outputs.
+ */
+int multiPrintf(char * format, ...){
+    char buffer[256];
+
+    // Format string
+    va_list args;
+    va_start(args, format);
+    int length = vsprintf(buffer, format, args);
+    va_end(args);
+
+    // Output serial
+    printf("%s", buffer);
+
+    // Add string to outgoing websocket buffer
+    xSemaphoreTake(wsOutMutex, portMAX_DELAY);
+    wsOutString.append(buffer);
+    xSemaphoreGive(wsOutMutex);
+
+    return length;
+}
+
+/**
  * Serial read line
  * 
  * Store chars from serial input into provided buffer.
@@ -72,59 +158,6 @@ bool serialReadLine(char * buf, size_t limit) {
         Serial.read();
     }
     return false;
-}
-
-/**
- * Scan I2C
- * 
- * Scan and print addresses of responding I2C devices.
- * Expects 7-bit address space.
- */
-void scanI2C() {
-    bool found = false;
-    multiPrintf("HEX: DEC:\n");
-
-    // Iterate through valid slave addreses
-    for (uint8_t address = 8; address < 120; address++) {
-        // Probe address and check return state
-        Wire.beginTransmission(address);
-        if (Wire.endTransmission() == I2C_ERROR_OK) {
-            // Device found, print address in HEX and DEC
-            multiPrintf("0x%02x  %3u\n", address, address);
-            found = true;
-        }
-    }
-
-    if (found) {
-        multiPrintf("I2C scan completed.\n");
-    } else {
-        multiPrintf("No I2C device found.\n");
-    }
-}
-
-/**
- * Multi printf
- * 
- * Print formatted data to multiple outputs.
- */
-int multiPrintf(char * format, ...){
-    char buffer[256];
-
-    // Format string
-    va_list args;
-    va_start(args, format);
-    int length = vsprintf(buffer, format, args);
-    va_end(args);
-
-    // Output serial
-    printf("%s", buffer);
-
-    // Add string to outgoing websocket buffer
-    xSemaphoreTake(wsOutMutex, portMAX_DELAY);
-    wsOutString.append(buffer);
-    xSemaphoreGive(wsOutMutex);
-
-    return length;
 }
 
 /**

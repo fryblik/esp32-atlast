@@ -13,7 +13,6 @@ struct runData {
     bool startFlag;
     volatile bool killFlag;
     bool isRunning;
-    atl_statemark mk;   // TODO: unused
 };
 extern struct runData rd;
 

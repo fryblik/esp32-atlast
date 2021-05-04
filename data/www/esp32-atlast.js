@@ -269,10 +269,10 @@ function executeFile() {
 			// ATLAST code to run
 			// Declare file (non-unique descriptor "FEXE" when repeated - ugly, but harmless)
 			let code = 'FILE FEXE ';
-			// Open desired file for reading
-			code += '"' + path + '" 1 FEXE FOPEN ';
-			// Execute file
-			code += 'FEXE FLOAD ';
+			// Open desired file for reading, discard return value
+			code += '"' + path + '" 1 FEXE FOPEN DROP ';
+			// Execute file, discard return value
+			code += 'FEXE FLOAD DROP ';
 			// Close file after execution
 			code += 'FEXE FCLOSE';
 

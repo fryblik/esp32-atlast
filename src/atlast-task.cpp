@@ -8,7 +8,6 @@
 struct runData rd;
 
 // Run Data mutex and task handle
-// TODO: rework to use faster task notifications instead?
 SemaphoreHandle_t atlastRunMutex = xSemaphoreCreateMutex();
 TaskHandle_t atlastTaskHandle = nullptr;
 
@@ -62,8 +61,6 @@ void resetAtlastRun() {
  * Run in a separate task.
  */
 void atlastInterpreterLoop(void * pvParameter) {
-    // TODO: atl_load, atl_mark, atl_unwind
-
     // Wait for execution
     while(true) {
         // If not ready to start, waits and tries again
@@ -85,7 +82,6 @@ void atlastInterpreterLoop(void * pvParameter) {
 
             // Release mutex during execution to allow addition of commands to queue
             // DIRTY: rd.commands.pop() must not be called in the meantime!!!
-            // TODO: Maybe use strcpy instead of pointing to string in queue?
             xSemaphoreGive(atlastRunMutex);
 
             // Evaluate string in front of queue
@@ -157,11 +153,12 @@ void atlastInit() {
 
     // Run ATLAST source file "/atl/pins.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.commands.push("file startupfile");
-    rd.commands.push("\"/atl/pins.atl\" 1 startupfile fopen");
-    rd.commands.push("startupfile fload");
-    rd.commands.push("startupfile fclose");
-    rd.startFlag = true;
+    rd.commands.push("file startupfile");   // Create file descriptor
+    rd.commands.push("\"/atl/pins.atl\" 1 startupfile fopen"); // Open file
+    rd.commands.push("startupfile fload");  // Execute file
+    rd.commands.push("startupfile fclose"); // Close file
+    rd.commands.push("clear");  // Clear return values from stack
+    rd.startFlag = true;    // Star ATLAST machine
     xSemaphoreGive(atlastRunMutex);
 }
 
