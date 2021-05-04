@@ -11,6 +11,7 @@
 		This program is in the public domain.
 
 */
+// Modified in 2021 by Vojtech Fryblik.
 
 #include <stdio.h>
 #include <ctype.h>

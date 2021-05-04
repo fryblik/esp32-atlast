@@ -1,8 +1,24 @@
 // jQuery document
 
+/* This file is part of Interactive Atlast Forth Interpreter For ESP32.
+ * Copyright (C) 2021  Vojtech Fryblik <433796@mail.muni.cz>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import {CodeJar} from '/www/codejar.min.js';
 import {withLineNumbers} from '/www/linenumbers.min.js';
-
 
 
 // WebSocket connection and handling //////////////////////////////////////////////////////////////
@@ -107,7 +123,6 @@ function requestFileList() {
 }
 
 
-
 // Code editor ////////////////////////////////////////////////////////////////////////////////////
 
 let jar; // CodeJar object
@@ -133,7 +148,6 @@ function initEditor() {
 	let newCode = 'sample code';
 	jar.updateCode(newCode);
 }
-
 
 
 // Helper functions for DOM event handlers ////////////////////////////////////////////////////////
@@ -178,7 +192,6 @@ function getFileSelect() {
 	// Return path
 	return selection.text();
 }
-
 
 
 // DOM event handlers /////////////////////////////////////////////////////////////////////////////
@@ -390,7 +403,6 @@ function editLocalFile() {
 		editLocalDialog.val(null);
 	});
 }
-
 
 
 // Run these functions when DOM is ready //////////////////////////////////////////////////////////

@@ -16,6 +16,7 @@
 		This program is in the public domain.
 
 */
+// Modified in 2021 by Vojtech Fryblik.
 
 typedef long atl_int;		      /* Stack integer type */
 typedef double atl_real;	      /* Real number type */

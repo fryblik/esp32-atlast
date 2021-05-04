@@ -17,6 +17,7 @@
 		This program is in the public domain.
 
 */
+// Modified in 2021 by Vojtech Fryblik.
 
 #include "atlast.h"                   /* Define user linkage structures */
 
