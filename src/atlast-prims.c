@@ -59,7 +59,9 @@ prim P_pinw() {
  * [pin] -> PINR -> [value]
  */
 prim P_pinr() {
+    // Check for stack underflow (need 1 argument)
     Sl(1);
+    // Run function and put return value on stack
     stackitem s = digitalRead(S0);
     S0 = s;
 }
@@ -77,6 +79,32 @@ prim P_dacw() {
     dacWrite(S1, S0);
     // Pop stack twice
     Pop2;
+}
+
+/**
+ * ADC - read value from pin in 12-bit range
+ * 
+ * [pin] -> ADCR -> [value]
+ */
+prim P_adcr() {
+    // Check for stack underflow (need 1 argument)
+    Sl(1);
+    // Run function and put return value on stack
+    stackitem s = analogRead(S0);
+    S0 = s;
+}
+
+/**
+ * ADC - read value from pin in mV
+ * 
+ * [pin] -> ADCR_MV -> [value]
+ */
+prim P_adcr_mv() {
+    // Check for stack underflow (need 1 argument)
+    Sl(1);
+    // Run function and put return value on stack
+    stackitem s = analogReadMilliVolts(S0);
+    S0 = s;
 }
 
 /**
@@ -262,6 +290,8 @@ static struct primfcn espPrims[] = {
     {"0PINW",       P_pinw},
     {"0PINR",       P_pinr},
     {"0DACW",       P_dacw},
+    {"0ADCR",       P_adcr},
+    {"0ADCR_MV",    P_adcr_mv},
     {"0DELAY_MS",   P_delay_ms},
     {"0UPTIME_MS",  P_uptime_ms},
     {"0UPTIME_S",   P_uptime_s},
