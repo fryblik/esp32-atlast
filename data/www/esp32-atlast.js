@@ -64,8 +64,7 @@ function connectWS() {
 				// File deleted, update file list
 				requestFileList();
 			} else {
-				// TODO
-				console.log('Deletion failed!');
+				alert('Deletion failed: ' + obj.status);
 			}
 		}
 	}
@@ -145,8 +144,8 @@ function initEditor() {
 		opts);
 
 	// Update contents
-	let newCode = 'sample code';
-	jar.updateCode(newCode);
+	//let newCode = 'sample code';
+	//jar.updateCode(newCode);
 }
 
 

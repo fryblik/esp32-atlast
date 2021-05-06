@@ -30,12 +30,12 @@ TaskHandle_t atlastTaskHandle = nullptr;
 
 
 /**
- * Start ATLAST run
+ * ATLAST start run
  * 
  * Check start flag. If true, start execution. Otherwise wait a bit.
  * Returns true on program start, false otherwise.
  */
-bool startAtlastRun() {
+bool atlastStartRun() {
     // Take mutex
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);    
 
@@ -46,7 +46,7 @@ bool startAtlastRun() {
         xSemaphoreGive(atlastRunMutex);
         return true;
     } else {
-        // Release mutex and wait for next try
+        // Release mutex and wait 0.1s
         xSemaphoreGive(atlastRunMutex);
         vTaskDelay(100 / portTICK_RATE_MS);
         return false;
@@ -54,12 +54,12 @@ bool startAtlastRun() {
 }
 
 /**
- * Reset ATLAST run
+ * ATLAST reset run
  * 
  * Reset Run Data and release mutex.
  */
-void resetAtlastRun() {
-    // Reset queue if nonempty
+void atlastResetRun() {
+    // Empty the queue if nonempty
     if (!rd.commands.empty()) {
         std::queue<std::string> emptyQueue;
         std::swap(rd.commands, emptyQueue);
@@ -73,15 +73,15 @@ void resetAtlastRun() {
 /**
  * ATLAST interpreter loop
  * 
- * Execute ATLAST commands when available.
+ * Execute ATLAST commands from queue when available.
  * Blocks atlastRunMutex.
  * Run in a separate task.
  */
 void atlastInterpreterLoop(void * pvParameter) {
     // Wait for execution
     while(true) {
-        // If not ready to start, waits and tries again
-        if (!startAtlastRun())
+        // If not ready to start, try again
+        if (!atlastStartRun())
             continue;
         
         // Take mutex
@@ -94,20 +94,17 @@ void atlastInterpreterLoop(void * pvParameter) {
                 break;
             }
 
-            // Get pointer to the string in front of queue
+            // Get pointer to the string in front of the queue
             char *command = &rd.commands.front()[0];
-
             // Release mutex during execution to allow addition of commands to queue
-            // DIRTY: rd.commands.pop() must not be called in the meantime!!!
+            // Note: rd.commands.pop() must not be called in the meantime!
             xSemaphoreGive(atlastRunMutex);
-
-            // Evaluate string in front of queue
+            // Evaluate string in front of the queue
             atl_eval(command);
 
             // Take mutex again
             xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-
-            // Remove front string from queue
+            // Remove front string from the queue
             rd.commands.pop();
 
             // Print acknowledgement of executed command
@@ -115,7 +112,7 @@ void atlastInterpreterLoop(void * pvParameter) {
         }
 
         // Reset Run Data and release mutex
-        resetAtlastRun(); 
+        atlastResetRun(); 
     }
 }
 
@@ -130,7 +127,7 @@ void atlastCommand(char* command) {
 
     // Print incoming command
 	multiPrintf("> %s\n", command);
-    // Append command to Run Data and start execution
+    // Append command to Run Data and start execution, if needed
     rd.commands.push(command);
     if (!rd.isRunning) {
         rd.startFlag = true;
@@ -142,9 +139,10 @@ void atlastCommand(char* command) {
 
 /**
  * ATLAST create task
+ * 
+ * Create ATLAST machine task.
  */
 void atlastCreateTask() {
-    // Create ATLAST interpreter task
     xTaskCreate(&atlastInterpreterLoop,
                 ATL_TASK_NAME,
                 65536, // TODO: Set reasonable stack size
@@ -156,7 +154,7 @@ void atlastCreateTask() {
 /**
  * ATLAST init
  * 
- * Initiate Atlast and create interpreter task.
+ * Initiate ATLAST and create interpreter task.
  */
 void atlastInit() {
     // Need to explicitly initialize ATLAST before extending dictionary
@@ -170,11 +168,13 @@ void atlastInit() {
 
     // Run ATLAST source file "/atl/pins.atl"
     xSemaphoreTake(atlastRunMutex, portMAX_DELAY);
-    rd.commands.push("file startupfile");   // Create file descriptor
-    rd.commands.push("\"/atl/pins.atl\" 1 startupfile fopen"); // Open file
-    rd.commands.push("startupfile fload");  // Execute file
-    rd.commands.push("startupfile fclose"); // Close file
-    rd.commands.push("clear");  // Clear return values from stack
+    rd.commands.push(
+        "file startupfile "     // Create file descriptor
+        "\"/atl/pins.atl\" 1 startupfile fopen "    // Open file
+        "startupfile fload "    // Execute file
+        "startupfile fclose "   // Close file
+        "clear"                 // Clear return values from stack
+    );
     rd.startFlag = true;    // Star ATLAST machine
     xSemaphoreGive(atlastRunMutex);
 }
@@ -184,7 +184,7 @@ void atlastInit() {
  * 
  * Sets KILL flag to reset Run Data.
  * Breaks running ATLAST program.
- * Restarts ATLAST in new task if requested.
+ * Restarts ATLAST in a new task if requested.
  * Does not call ATLAST ABORT (that would reset atlast.c state itself).
  */
 void atlastKill(bool restartTask) {
@@ -213,10 +213,10 @@ void atlastKill(bool restartTask) {
             vTaskDelay(50 / portTICK_PERIOD_MS);
         } while (!strcmp(pcTaskGetTaskName(atlastTaskHandle), ATL_TASK_NAME));
 
-        resetAtlastRun();
+        atlastResetRun();
         atlastCreateTask();
 
-        // Clear return stack before anything else (keeps data stack)
+        // Command to clear return stack (keeps data stack)
         rd.commands.push("quit");
         rd.startFlag = true;
     }

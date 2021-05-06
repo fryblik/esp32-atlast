@@ -123,9 +123,9 @@ void parseReceived(void * arg, uint8_t * data, size_t len) {
         return;
 
     } else if (info->message_opcode == WS_TEXT) {
-        // Fragmented text (JSON)
+        // Message is fragmented
 
-        // TODO: Handle fragmented text data? So far not necessary.
+        // Fragmented text data should never arrive with normal use
         multiPrintf("DISCARDED INPUT: Multi-frame text data received.\n");
     }
 }

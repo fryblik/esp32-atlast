@@ -61,8 +61,6 @@ bool getWlanConfigJSON() {
     strcpy(wlanConf.ssid, doc["networks"][0]["ssid"]);
     strcpy(wlanConf.password, doc["networks"][0]["password"]);
 
-    // TODO: Load multiple WLAN configurations?
-
     return true;
 }
 

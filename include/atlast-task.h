@@ -39,6 +39,21 @@ extern TaskHandle_t atlastTaskHandle;
 
 
 /**
+ * ATLAST start run
+ * 
+ * Check start flag. If true, start execution.
+ * Returns true on program start, false otherwise.
+ */
+bool atlastStartRun();
+
+/**
+ * ATLAST reset run
+ * 
+ * Reset Run Data and release mutex.
+ */
+void atlastResetRun();
+
+/**
  * ATLAST interpreter loop
  * 
  * Execute ATLAST commands when available.
@@ -55,13 +70,15 @@ void atlastCommand(char* command);
 
 /**
  * ATLAST create task
+ * 
+ * Create ATLAST machine task.
  */
 void atlastCreateTask();
 
 /**
  * ATLAST init
  * 
- * Initiate Atlast and create interpreter task.
+ * Initiate ATLAST and create interpreter task.
  */
 void atlastInit();
 
