@@ -235,6 +235,17 @@ function sendInput() {
 	});
 }
 
+// Handler: On click request file list
+function refreshFileList() {
+	// Uses ws.send() - wait for websocket connection event
+	ws.onopen = function(event) {
+		// On refresh button click
+		$( '#fileRefreshButton' ).click(function() {
+			requestFileList();
+		});
+	}
+}
+
 // Handler: On click download and save file from ESP
 function downloadFile() {
 	// On download button click
@@ -413,6 +424,7 @@ $(connectWS);
 // Set up DOM event handlers
 $(killProgram);
 $(sendInput);
+$(refreshFileList);
 $(downloadFile);
 $(editDeviceFile);
 $(executeFile);
