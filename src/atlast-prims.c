@@ -45,8 +45,11 @@ prim P_pinm() {
  * [pin] [value] -> PINW
  */
 prim P_pinw() {
+    // Check for stack underflow (need 2 arguments)
     Sl(2);
+    // Run function using two items on stack
     digitalWrite(S1, S0);
+    // Pop stack twice
     Pop2;
 }
 
@@ -59,6 +62,21 @@ prim P_pinr() {
     Sl(1);
     stackitem s = digitalRead(S0);
     S0 = s;
+}
+
+/**
+ * DAC - set voltage to pin
+ * 
+ * [pin] [value] -> DACW
+ * Value O..255 for 0..3.3V.
+ */
+prim P_dacw() {
+    // Check for stack underflow (need 2 arguments)
+    Sl(2)
+    // Run function using two items on stack
+    dacWrite(S1, S0);
+    // Pop stack twice
+    Pop2;
 }
 
 /**
@@ -243,6 +261,7 @@ static struct primfcn espPrims[] = {
     {"0PINM",       P_pinm},
     {"0PINW",       P_pinw},
     {"0PINR",       P_pinr},
+    {"0DACW",       P_dacw},
     {"0DELAY_MS",   P_delay_ms},
     {"0UPTIME_MS",  P_uptime_ms},
     {"0UPTIME_S",   P_uptime_s},
