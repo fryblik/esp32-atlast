@@ -2,6 +2,11 @@
 
 \  ATLAST  --  Comprehensive regression test
 
+\  Modified for ESP:
+\   Added leading slashes to file paths.
+\   Removed SYSTEM command test.
+\   Removed TESTCONS notice.
+
 \  Check integer result
 
 132 string estring
@@ -763,8 +768,8 @@ variable k
         "   1.234E2" tstr s! tstr strreal tstr 10 + 123.4  3 nok?
         "Bilge" tstr s! tstr strreal tstr 0.0   3 nok?
         "  0771234Real" tstr s! tstr strreal tstr 9 + 771234.0  3 nok?
-\   	Following test disabled because some libraries permit hexadecimal
-\   	floating point constants.
+\   Following test disabled because some libraries permit hexadecimal
+\   floating point constants.
 \       "  0xBEEF0ABEGHex!" tstr s! tstr strreal tstr 3 + 0.0  3 nok?
 ;
 
@@ -774,7 +779,7 @@ file fio
 variable fp1
 
 : testfile
-    "regtest.tmp" tstr s!
+    "/regtest.tmp" tstr s!
 
     "FOPEN" tests:
         tstr 15 fio fopen -1 ok?
@@ -845,7 +850,7 @@ variable fp1
         fio fclose
 
     "FDELETE" tests:
-        "nonesuch.tmp" fdelete 0 ok?
+        "/nonesuch.tmp" fdelete 0 ok?
         tstr fdelete -1 ok?
         tstr 5 fio fopen 0 ok?
 ;
@@ -1016,7 +1021,7 @@ testlctl
 
 : testload
     "FLOAD" tests:
-        "regtemp.tmp" tstr s!
+        "/regtemp.tmp" tstr s!
         tstr 10 fio fopen -1 ok?
         "XX : 8times 8 * ;" fio fputs -1 ok?
         ": 11plus 11 + ;" fio fputs -1 ok?
@@ -1024,7 +1029,7 @@ testlctl
         tstr 5 fio fopen -1 ok?
         3 0 fio fseek fio fload 0 ok?
         fio fclose
-        "regtemp.tmp" fdelete -1 ok?
+        "/regtemp.tmp" fdelete -1 ok?
 ;
 
 testload
@@ -1083,11 +1088,11 @@ errcount
     "MEMSTAT" tests:
         memstat
 
-    "SYSTEM" tests:
-        ." "\n\nEnter an operating system command to be used\n"
-        ." "to test the SYSTEM primitive.  Example: ls or DIR\n"
-        inline
-        tstr system 0 ok?
+    \ "SYSTEM" tests:
+    \     ." "\n\nEnter an operating system command to be used\n"
+    \     ." "to test the SYSTEM primitive.  Example: ls or DIR\n"
+    \     inline
+    \     tstr system 0 ok?
 
     "WORDSUSED" tests:
         ." "\nPress RETURN to begin list of words used:" inline wordsused
@@ -1102,4 +1107,4 @@ errcount
         wordsunused
 ;
 
-.( "For console I/O tests, use \"atlast -iregress\" and enter TESTCONS\n"
+\ .( "For console I/O tests, use \"atlast -iregress\" and enter TESTCONS\n"

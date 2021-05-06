@@ -17,6 +17,7 @@
 
 */
 // Modified in 2021 by Vojtech Fryblik.
+// Modifications are denoted by a comment starting with "ESP: "
 
 typedef long atl_int;		      /* Stack integer type */
 typedef double atl_real;	      /* Real number type */
@@ -56,7 +57,7 @@ extern atl_int atl_errline;	      /* Line number where last atl_load()
 #define ATL_APPLICATION -14	      /* Application primitive atl_error() */
 
 /*  Entry points  */
-//  ESP: C/C++ linker compatibility, EXPORT and ESP32 definition
+// ESP: C/C++ linker compatibility
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,5 +68,5 @@ extern void atl_memstat();
 }
 #endif
 
-/* Config */
+// ESP: EXPORT definition to gain outside access to internal variables
 #define EXPORT

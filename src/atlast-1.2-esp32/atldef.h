@@ -17,7 +17,6 @@
 		This program is in the public domain.
 
 */
-// Modified in 2021 by Vojtech Fryblik.
 
 #include "atlast.h"                   /* Define user linkage structures */
 
@@ -279,12 +278,11 @@ pragma On(PCC_msgs);		      /* High C compiler is brain-dead */
 #define SREAL0(x) rbuf2=(x); (void)memcpy((char *) &S1, (char *) &rbuf2, sizeof(atl_real))
 #define SREAL1(x) rbuf2=(x); (void)memcpy((char *) &S3, (char *) &rbuf2, sizeof(atl_real))
 #else
-// ESP: alignment shifted as in https://github.com/blippy/rpi/tree/master/atlast
-#define REAL0	*((atl_real *) &S0)   /* First real on stack */
-#define REAL1	*((atl_real *) &S1)   /* Second real on stack */
-#define REAL2	*((atl_real *) &S2)   /* Third real on stack */
-#define SREAL0(x) *((atl_real *) &S0) = (x)
-#define SREAL1(x) *((atl_real *) &S1) = (x)
+#define REAL0	*((atl_real *) &S1)   /* First real on stack */
+#define REAL1	*((atl_real *) &S3)   /* Second real on stack */
+#define REAL2	*((atl_real *) &S5)   /* Third real on stack */
+#define SREAL0(x) *((atl_real *) &S1) = (x)
+#define SREAL1(x) *((atl_real *) &S3) = (x)
 #endif
 
 /*  File I/O definitions (used only if FILEIO is configured).  */

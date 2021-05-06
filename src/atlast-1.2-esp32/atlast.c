@@ -12,6 +12,7 @@
 
 */
 // Modified in 2021 by Vojtech Fryblik.
+// Modifications are denoted by a comment starting with "ESP: "
 
 #include <stdio.h>
 #include <ctype.h>
@@ -64,10 +65,8 @@
 #define SHORTCUTA		      /* Shortcut integer arithmetic words */
 #define SHORTCUTC		      /* Shortcut integer comparison */
 #define STRING			      /* String functions */
-
-// ESP:
+// ESP: Undefined SYSTEM
 //#define SYSTEM			      /* System command function */
-
 #ifndef NOMEMCHECK
 #define TRACE			      /* Execution tracing */
 #define WALKBACK		      /* Walkback trace */
@@ -132,7 +131,8 @@ typedef enum {False = 0, True = 1} Boolean;
 
 atl_int atl_stklen = 100;	      /* Evaluation stack length */
 atl_int atl_rstklen = 100;	      /* Return stack length */
-atl_int atl_heaplen = 1000;	      /* Heap length */
+// ESP: Heap length increased from 1000
+atl_int atl_heaplen = 10000;      /* Heap length */
 atl_int atl_ltempstr = 256;	      /* Temporary string buffer length */
 atl_int atl_ntempstr = 4;	      /* Number of temporary string buffers */
 
@@ -1174,7 +1174,6 @@ prim P_strform()		      /* Format integer using sprintf() */
     Npop(3);
 }
 
-// TODO: make as https://github.com/blippy/rpi/blob/master/atlast/atlast.c ?
 #ifdef REAL
 prim P_fstrform()		      /* Format real using sprintf() */
 {                                     /* rvalue "%6.2f" str -- */
@@ -1567,7 +1566,7 @@ prim P_fopen()			      /* Open file: fname fmodes fd -- flag */
     Hpc(S0);
     Isfile(S0);
 
-    // ESP: Prepend file path with SPIFFS path prefix
+    // ESP: Prepend file path with SPIFFS mount point prefix
     char spiffsPath[40];
     strncpy(stpcpy(spiffsPath, "/spiffs"), (char *) S2, 32);
 
@@ -1597,7 +1596,12 @@ prim P_fdelete()		      /* Delete file: fname -- flag */
 {
     Sl(1);
     Hpc(S0);
-    S0 = (unlink((char *) S0) == 0) ? Truth : Falsity;
+
+    // ESP: Prepend file path with SPIFFS mount point prefix	
+    char spiffsPath[40];	
+    strncpy(stpcpy(spiffsPath, "/spiffs"), (char *) S0, 32);
+
+    S0 = (unlink(spiffsPath) == 0) ? Truth : Falsity;
 }
 
 prim P_fgetline()		      /* Get line: fd string -- flag */
