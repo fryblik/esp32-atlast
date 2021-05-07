@@ -353,7 +353,7 @@ void incomingJsonDelete(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
  */
 void incomingJsonKill(StaticJsonDocument<STATIC_JSON_SIZE> & doc) {
     // Get ATLAST task restart parameter
-    bool restartTask = doc["restartTask"];
+    bool restartTask = doc["data"];
     //multiPrintf("DEBUG: restartTask %d\n", restartTask);
 
     atlastKill(restartTask);

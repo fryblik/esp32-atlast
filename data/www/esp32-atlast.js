@@ -200,9 +200,9 @@ function killProgram() {
 	// Send KILL request JSON, include parameter from checkbox
 	$( '#killButton' ).click(function() {
 		if ($( '#restartTaskBox ').is(':checked')) {
-			ws.send('{"type":"kill","restartTask":1}');
+			ws.send('{"type":"kill","data":true}');
 		} else {
-			ws.send('{"type":"kill","restartTask":0}');
+			ws.send('{"type":"kill","data":false}');
 		}
 	});
 }
