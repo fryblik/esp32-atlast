@@ -145,9 +145,9 @@ void atlastCommand(char* command) {
 void atlastCreateTask() {
     xTaskCreate(&atlastInterpreterLoop,
                 ATL_TASK_NAME,
-                65536, // TODO: Set reasonable stack size
+                4096,   // Stack size
                 NULL,
-                5,
+                5,  // Priority
                 &atlastTaskHandle); // Store task handle
 }
 
