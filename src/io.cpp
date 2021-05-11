@@ -124,7 +124,7 @@ int multiPrintf(char * format, ...){
     va_end(args);
 
     // Output serial
-    printf("%s", buffer);
+    Serial.print(buffer);
 
     // Add string to outgoing websocket buffer
     xSemaphoreTake(wsOutMutex, portMAX_DELAY);
