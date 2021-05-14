@@ -154,7 +154,6 @@ void setupWebServer() {
     MDNS.begin("esp");
 
     // Start the task handling websocket CLI output
-    // TODO: Set reasonable stack size
     xTaskCreate(&wsSendCliLoop, "ws_cli_out", 8196, NULL, 5, NULL);
 }
 
