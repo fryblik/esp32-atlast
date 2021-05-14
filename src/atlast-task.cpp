@@ -108,7 +108,7 @@ void atlastInterpreterLoop(void * pvParameter) {
             rd.commands.pop();
 
             // Print acknowledgement of executed command
-            multiPrintf("\n  ok\n");
+            multiPrintf("\n< ok\n");
         }
 
         // Reset Run Data and release mutex
