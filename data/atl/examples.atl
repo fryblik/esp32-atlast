@@ -17,7 +17,6 @@
 
 \ Requires `pins.atl` (should be run automatically on startup).
 
-\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 \ Example 1: Blinking green LED 3 times
 
@@ -38,7 +37,7 @@
 \ Function: Execute BLINK 3 times
 : blink3 blink blink blink ;
 
-\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 
 \ Example 2: Control LED with the B4 button
 
@@ -62,7 +61,7 @@
     b3 pinr low = until \ Loop until button B3 turns low
 ;
 
-\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 
 \ Example 3: Pulse-width modulation
 
@@ -102,7 +101,7 @@ variable pwm-duration
     +loop                       \ Run PWM loop
 ;
 
-\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 
 \ Example 4: Reading I2C accelerometer data
 
@@ -130,7 +129,7 @@ variable pwm-duration
         \ Read from I2C
         6 104 i2cread
 
-    \ Convert and print received data on stack:
+    \ Convert and print received data from stack:
         \ Range +-16g: 16
         16 parseaccel
 
